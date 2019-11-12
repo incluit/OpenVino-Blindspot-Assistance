@@ -1,0 +1,178 @@
+= OpenVino Blindspot Assistance
+:idprefix:
+:idseparator: -
+:sectanchors:
+:sectlinks:
+:sectnumlevels: 6
+:sectnums:
+:toc: macro
+:toclevels: 6
+:toc-title: Table of Contents
+
+https://travis-ci.org/incluit/OpenVino-Blindspot-Assistance#[image:https://travis-ci.org/incluit/OpenVino-Blindspot-Assistance.svg?branch=master[Build
+Status]]
+https://sonarcloud.io/dashboard?id=incluit_OpenVino-Blindspot-Assistance[image:https://sonarcloud.io/api/project_badges/measure?project=incluit_OpenVino-Blindspot-Assistance&metric=alert_status[Sonarcloud
+Status]]
+
+toc::[]
+
+== Foreword
+This is a follow-up on the OpenVino's demo:
+
+https://docs.openvinotoolkit.org/latest/_demos_python_demos_object_detection_demo_ssd_async_README.html
+
+We will work on and extend this tutorial as a demo app for blindspot detection.
+
+== Introduction
+
+This project consists on showcasing the advantages of the Intel's OpenVINO toolkit. We will develop a __Blindspot Assistance__ case scenario, where we will define a blindspot area to detect vehicles and pedestrians. For that, we will use the OpenVINO toolkit and OpenCV, all written in `{Python}`.
+
+As mentioned previously, we will take the https://docs.openvinotoolkit.org/latest/_demos_python_demos_object_detection_demo_ssd_async_README.html[Object Detection SSD Python* Demo] as a starting point.
+
+=== [Optional] AWS (In Progress)
+
+We also plan to send the data through MQTT using AWS IoT-Core. Using AWS may incur in a cost, so this will also be optional for you to run with/without it.
+
+== Bussines Logic
+
+Using OpenVino's model detection we can easily detect pedestrians and vehicles with great accuracy. We are currently using a pedestrian and vehicle detection model that is included with OpenVino out-of-the-box:
+
+. pedestrian-and-vehicle-detector-adas-0001
+
+== Prerequisites
+
+To run the application in this tutorial, the OpenVINO™ toolkit (Release R2 or greater) and its dependencies must already be installed and verified using the included demos. Installation instructions may be found at: https://software.intel.com/en-us/articles/OpenVINO-Install-Linux
+
+If to be used, any optional hardware must also be installed and verified including:
+
+* USB camera - Standard USB Video Class (UVC) camera.
+
+* Intel® Core™ CPU with integrated graphics.
+
+* VPU - USB Intel® Movidius™ Neural Compute Stick and what is being referred to as "Myriad"
+
+A summary of what is needed:
+
+=== Hardware
+
+* Target and development platforms meeting the requirements described in the "System Requirements" section of the OpenVINO™ toolkit documentation which may be found at: https://software.intel.com/en-us/openvino-toolkit
+
+**Note**: While writing this tutorial, an Intel® i7-8550U with Intel® HD graphics 520 GPU was used as both the development and target platform.
+
+* Optional:
+
+** Intel® Movidius™ Neural Compute Stick
+
+** USB UVC camera
+
+** Intel® Core™ CPU with integrated graphics.
+
+=== Software
+
+* OpenVINO™ toolkit supported Linux operating system. This tutorial was run on 64-bit Ubuntu 18.04.3 LTS updated to kernel 4.15.0-66 following the OpenVINO™ toolkit installation instructions.
+
+* The latest OpenVINO™ toolkit installed and verified. Supported versions +2019 R2. (Lastest version supported 2019 R3.1).
+
+* Git(git) for downloading from the GitHub repository.
+
+=== Checks
+
+By now you should have completed the Linux installation guide for the OpenVINO™ toolkit, however before continuing, please ensure:
+
+* That after installing the OpenVINO™ toolkit you have run the supplied demo samples 
+
+* If you have and intend to use a GPU: You have installed and tested the GPU drivers 
+
+* If you have and intend to use a USB camera: You have connected and tested the USB camera 
+
+* If you have and intend to use a Myriad: You have connected and tested the USB Intel® Movidius™ Neural Compute Stick
+
+* That your development platform is connected to a network and has Internet access. To download all the files for this tutorial, you will need to access GitHub on the Internet. 
+
+== Building
+
+=== Basic Build
+
+**1.** Clone the repository at desired location:
+
+[source,bash]
+----
+git clone https://github.com/incluit/OpenVino-Blindspot-Assistance.git
+----
+
+**2.** Change to the top git repository:
+
+[source,bash]
+----
+cd OpenVino-Blindspot-Assistance
+----
+
+**3.** Download the necessary model
+
+[source,bash]
+----
+bash scripts/download_models.sh
+----
+
+== Usage
+
+=== Run
+
+Run the application with the `-h` option to see the usage message:
+
+[source,bash]
+----
+python3 blindspot_assistance.py -h
+----
+
+Options:
+[source,bash]
+----
+  -h, --help            Show this help message and exit.
+  -m MODEL, --model MODEL
+                        Required. Path to an .xml file with a trained model.
+  -i INPUT, --input INPUT
+                        Required. Path to video file or image. 'cam' for
+                        capturing video stream from camera
+  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
+                        Optional. Required for CPU custom layers. Absolute
+                        path to a shared library with the kernels
+                        implementations.
+  -d DEVICE, --device DEVICE
+                        Optional. Specify the target device to infer on; CPU,
+                        GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
+                        look for a suitable plugin for device specified.
+                        Default value is CPU
+  --labels LABELS       Optional. Path to labels mapping file
+  -pt PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
+                        Optional. Probability threshold for detections
+                        filtering
+----
+
+Example:
+
+[source,bash]
+----
+python3 blindspot_assistance.py -m models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -i <path_to_video>/<video>.mp4 -pt 0.5 -d GPU
+----
+
+If using the native camera:
+
+[source,bash]
+----
+python3 blindspot_assistance.py -m models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -i cam -d GPU
+----
+
+If using an USB camera:
+
+[source,bash]
+----
+python3 blindspot_assistance.py -m models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -i /dev/video1 -d GPU
+----
+
+===== Other models
+
+You can also experiment by using different face detection models, being the ones available up to now:
+
+. person-vehicle-bike-detection-crossroad-0078
+. person-vehicle-bike-detection-crossroad-1016
