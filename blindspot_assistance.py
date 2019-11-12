@@ -45,6 +45,8 @@ def build_argparser():
     args.add_argument("--labels", help="Optional. Path to labels mapping file", default=None, type=str)
     args.add_argument("-pt", "--prob_threshold", help="Optional. Probability threshold for detections filtering",
                       default=0.5, type=float)
+    args.add_argument("-ct", "--cpu_threads", help="Optional. Specifies number of threads that CPU plugin should "
+                            "use for inference. Zero (default) means using all (logical) cores", default=None, type=str)
 
     return parser
 def switch_class(argument):
@@ -66,6 +68,8 @@ def main():
     
     log.info("Creating Inference Engine...")
     ie = IECore()
+    if args.cpu_threads:
+        ie.set_config({'CPU_THREADS_NUM':args.cpu_threads},args.device)
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, "CPU")
     # Read IR

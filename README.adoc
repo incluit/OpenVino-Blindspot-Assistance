@@ -133,7 +133,7 @@ Options:
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
                         Required. Path to video file or image. 'cam' for
-                        capturing video stream from camera
+                        capturing video stream from camera.
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         Optional. Required for CPU custom layers. Absolute
                         path to a shared library with the kernels
@@ -143,10 +143,14 @@ Options:
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
                         look for a suitable plugin for device specified.
                         Default value is CPU
-  --labels LABELS       Optional. Path to labels mapping file
+  --labels LABELS       Optional. Path to labels mapping file.
   -pt PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
                         Optional. Probability threshold for detections
-                        filtering
+                        filtering.
+  -ct CPU_THREADS, --cpu_threads CPU_THREADS
+                        Specifies number of threads that CPU plugin should
+                        use for inference. Zero (default) means using all 
+                        (logical) cores.
 ----
 
 Example:
