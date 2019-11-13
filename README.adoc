@@ -25,7 +25,7 @@ We will work on and extend this tutorial as a demo app for blindspot detection.
 
 == Introduction
 
-This project consists on showcasing the advantages of the Intel's OpenVINO toolkit. We will develop a __Blindspot Assistance__ case scenario, where we will define a blindspot area to detect vehicles and pedestrians. For that, we will use the OpenVINO toolkit and OpenCV, all written in `{Python}`.
+This project consists on showcasing the advantages of the Intel's OpenVINO toolkit. We will develop a __Blindspot Assistance__ case scenario, where we will define a blindspot area to detect vehicles and pedestrians. For that, we will use the OpenVINO toolkit and OpenCV, all written in `Python`.
 
 As mentioned previously, we will take the https://docs.openvinotoolkit.org/latest/_demos_python_demos_object_detection_demo_ssd_async_README.html[Object Detection SSD Python* Demo] as a starting point.
 
