@@ -148,9 +148,13 @@ Options:
                         Optional. Probability threshold for detections
                         filtering.
   -ct CPU_THREADS, --cpu_threads CPU_THREADS
-                        Specifies number of threads that CPU plugin should
+                        Optional. Specifies number of threads that CPU plugin should
                         use for inference. Zero (default) means using all 
                         (logical) cores.
+  -o FILE_PATH, --output FILE_PATH
+                        Optional. Save the video output. Define the path of the video file.
+  -h_o, --hide_output
+                        Optional. Hide the output.
 ----
 
 Example:

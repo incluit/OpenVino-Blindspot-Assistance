@@ -48,7 +48,7 @@ def build_argparser():
     args.add_argument("-ct", "--cpu_threads", help="Optional. Specifies number of threads that CPU plugin should "
                             "use for inference. Zero (default) means using all (logical) cores", default=None, type=str)
     args.add_argument("-o", "--output", help="Optional. Save the video output. Define the path of the video file", default=None, type=str)
-    args.add_argument("-o_h", "--hide_output", help="Optional. Hide the output", default=None, type=str)
+    args.add_argument("-h_o", "--hide_output", help="Optional. Hide the output.",  action='store_true')
 
     return parser
 def switch_class(argument):
