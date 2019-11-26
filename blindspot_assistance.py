@@ -47,6 +47,8 @@ def build_argparser():
                       default=0.5, type=float)
     args.add_argument("-ct", "--cpu_threads", help="Optional. Specifies number of threads that CPU plugin should "
                             "use for inference. Zero (default) means using all (logical) cores", default=None, type=str)
+    args.add_argument("-o", "--output", help="Optional. Save the video output. Define the path of the video file", default=None, type=str)
+    args.add_argument("-o_h", "--hide_output", help="Optional. Hide the output", default=None, type=str)
 
     return parser
 def switch_class(argument):
@@ -119,6 +121,14 @@ def main():
         labels_map = None
 
     cap = cv2.VideoCapture(input_stream)
+
+    if args.output:
+        FILE_OUTPUT = args.output
+        if os.path.isfile(FILE_OUTPUT):
+            os.remove(FILE_OUTPUT)
+        fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        out = cv2.VideoWriter(FILE_OUTPUT,fourcc, fps, (int(cap.get(3)),int(cap.get(4))))
 
     cur_request_id = 0
     next_request_id = 1
@@ -227,7 +237,11 @@ def main():
                     (10, 10, 200), 1)
 
         render_start = time.time()
-        cv2.imshow("Detection Results", frame)
+
+        if args.output:
+            out.write(frame)
+        if not args.hide_output:
+            cv2.imshow("Detection Results", frame)
         
         render_end = time.time()
         render_time = render_end - render_start
