@@ -183,6 +183,15 @@ def main():
             ret, frame = cap.read()
             initial_w = cap.get(3)
             initial_h = cap.get(4)
+
+            # Selected rectangle overlay
+            overlay = frame.copy()
+            cv2.rectangle(overlay, (roi[0], roi[1]), (roi[0] + roi[2],
+                                                    roi[1] + roi[3]), (0, 0, 0), -1)  # A filled rectangle
+            alpha = 0.3  # Transparency factor.
+            # Following line overlays transparent rectangle over the image
+            cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
+
             in_frame = cv2.resize(frame, (w, h))
             # Change data layout from HWC to CHW
             in_frame = in_frame.transpose((2, 0, 1))
