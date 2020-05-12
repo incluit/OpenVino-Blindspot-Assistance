@@ -46,6 +46,8 @@ If to be used, any optional hardware must also be installed and verified includi
 
 * VPU - USB Intel® Movidius™ Neural Compute Stick and what is being referred to as "Myriad"
 
+* Python3-PIP
+
 A summary of what is needed:
 
 === Hardware
@@ -102,7 +104,14 @@ git clone https://github.com/incluit/OpenVino-Blindspot-Assistance.git
 cd OpenVino-Blindspot-Assistance
 ----
 
-**3.** Download the necessary model
+**3.** Install the requirements for the execution:
+
+[source,bash]
+----
+pip3 install -r requirements.txt 
+----
+
+**4.** Download the necessary model
 
 [source,bash]
 ----
