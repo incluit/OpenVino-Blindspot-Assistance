@@ -109,6 +109,59 @@ cd OpenVino-Blindspot-Assistance
 bash scripts/download_models.sh
 ----
 
+=== Build with Docker
+
+==== Prerequisites
+
+* Docker. To install on Ubuntu, run:
+
+[source,bash]
+----
+sudo snap install docker
+
+sudo groupadd docker
+
+sudo usermod -aG docker $USER
+----
+
+==== Installation
+
+**1.** Clone the repository at desired location:
+
+[source,bash]
+----
+git clone https://github.com/incluit/OpenVino-Blindspot-Assistance.git
+----
+
+**2.** Change to the top git repository:
+
+[source,bash]
+----
+cd OpenVino-Blindspot-Assistance
+----
+
+**3.** Build the docker:
+[source,bash]
+----
+docker build -t blindspot-assistance . --rm
+----
+
+**4.** Configure the display output with the following command:
+
+[source,bash]
+----
+xhost +
+----
+
+**5.** Run the  docker:
+
+[source,bash]
+----
+docker run --net=host --env="DISPLAY" -it --device /dev/dri:/dev/dri --device-cgroup-rule='c 189:* rmw' -v /dev/bus/usb:/dev/bus/usb --device=/dev/video0 --volume="$HOME/.Xauthority:/root/.Xauthority:rw" blindspot-assistance /bin/bash
+----
+
+**6.** Continue with the following usage steps inside the Docker.
+
 == Usage
 
 === Run
