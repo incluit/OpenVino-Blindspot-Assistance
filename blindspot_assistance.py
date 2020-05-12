@@ -55,6 +55,8 @@ def build_argparser():
         "-o", "--output", help="Optional. Save the video output. Define the path of the video file", default=None, type=str)
     args.add_argument("-h_o", "--hide_output",
                       help="Optional. Hide the output.",  action='store_true')
+    args.add_argument("-ni", "--number_iter",
+                      help="Optional. Number of inference iterations", default=1, type=int)
 
     return parser
 
@@ -125,7 +127,7 @@ def main():
     out_blob = next(iter(net.outputs))
     log.info("Loading IR to the plugin...")
     exec_net = ie.load_network(
-        network=net, num_requests=2, device_name=args.device)
+        network=net, num_requests=args.number_iter, device_name=args.device)
     # Read and pre-process input image
     n, c, h, w = net.inputs[input_blob].shape
     if img_info_input_blob:
@@ -160,9 +162,6 @@ def main():
         out = cv2.VideoWriter(FILE_OUTPUT, fourcc, fps,
                               (int(cap.get(3)), int(cap.get(4))))
 
-    cur_request_id = 0
-    next_request_id = 1
-
     log.info("Starting inference in async mode...")
     is_async_mode = True
     render_time = 0
@@ -172,121 +171,82 @@ def main():
     roi = [0, 0, int(cap.get(3) * 0.25), int(cap.get(4))]
 
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-    print("To switch between sync/async modes, press TAB key in the output window")
 
     object_time = 0
     alarm = False
     object_detected = False
 
     while cap.isOpened():
-        if is_async_mode:
-            ret, next_frame = cap.read()
-        else:
-            ret, frame = cap.read()
-        if not ret:
-            break
-        initial_w = cap.get(3)
-        initial_h = cap.get(4)
 
-        # Selected rectangle overlay
-        overlay = frame.copy()
-        cv2.rectangle(overlay, (roi[0], roi[1]), (roi[0] + roi[2],
-                                                  roi[1] + roi[3]), (0, 0, 0), -1)  # A filled rectangle
-        alpha = 0.3  # Transparency factor.
-        # Following line overlays transparent rectangle over the image
-        cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
-
-        # Main sync point:
-        # in the truly Async mode we start the NEXT infer request, while waiting for the CURRENT to complete
-        # in the regular mode we start the CURRENT request and immediately wait for it's completion
         inf_start = time.time()
-        if is_async_mode:
-            in_frame = cv2.resize(next_frame, (w, h))
-            # Change data layout from HWC to CHW
-            in_frame = in_frame.transpose((2, 0, 1))
-            in_frame = in_frame.reshape((n, c, h, w))
-            feed_dict[input_blob] = in_frame
-            exec_net.start_async(request_id=next_request_id, inputs=feed_dict)
-        else:
+        for i in range(0, args.number_iter):
+            ret, frame = cap.read()
+            initial_w = cap.get(3)
+            initial_h = cap.get(4)
             in_frame = cv2.resize(frame, (w, h))
             # Change data layout from HWC to CHW
             in_frame = in_frame.transpose((2, 0, 1))
             in_frame = in_frame.reshape((n, c, h, w))
             feed_dict[input_blob] = in_frame
-            exec_net.start_async(request_id=cur_request_id, inputs=feed_dict)
-        if exec_net.requests[cur_request_id].wait(-1) == 0:
-            inf_end = time.time()
-            det_time = inf_end - inf_start
+            exec_net.start_async(request_id=i, inputs=feed_dict)
 
-            # Parse detection results of the current request
-            # output_blob = [image_id, label, conf, x_min, y_min, x_max, y_max]
-            res = exec_net.requests[cur_request_id].outputs[out_blob]
-            for obj in res[0][0]:
-                # Draw only objects when probability more than specified threshold
-                if obj[2] > args.prob_threshold:
-                    xmin = int(obj[3] * initial_w)
-                    ymin = int(obj[4] * initial_h)
-                    xmax = int(obj[5] * initial_w)
-                    ymax = int(obj[6] * initial_h)
-                    class_id = int(obj[1])
-                    # Draw box and label\class_id
-                    color = switch_class_color(class_id)
-                    #color = (min(class_id * 12.5, 255), min(class_id * 7, 255), min(class_id * 5, 255))
-                    cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 1)
-                    det_label = labels_map[class_id] if labels_map else str(
-                        switch_class(class_id))
-                    cv2.putText(frame, det_label + ' ' + str(round(obj[2] * 100, 1)) + ' %', (xmin, ymin - 7),
-                                cv2.FONT_HERSHEY_COMPLEX, 0.5, color, 1)
+        for i in range(0, args.number_iter):
+            if exec_net.requests[i].wait(-1) == 0:
+                # Parse detection results of the current request
+                # output_blob = [image_id, label, conf, x_min, y_min, x_max, y_max]
+                res = exec_net.requests[0].outputs[out_blob]
+                for obj in res[0][0]:
+                    # Draw only objects when probability more than specified threshold
+                    if obj[2] > args.prob_threshold:
+                        xmin = int(obj[3] * initial_w)
+                        ymin = int(obj[4] * initial_h)
+                        xmax = int(obj[5] * initial_w)
+                        ymax = int(obj[6] * initial_h)
+                        class_id = int(obj[1])
+                        # Draw box and label\class_id
+                        color = switch_class_color(class_id)
+                        cv2.rectangle(frame, (xmin, ymin),
+                                      (xmax, ymax), color, 1)
+                        det_label = labels_map[class_id] if labels_map else str(
+                            switch_class(class_id))
+                        cv2.putText(frame, det_label + ' ' + str(round(obj[2] * 100, 1)) + ' %', (xmin, ymin - 7),
+                                    cv2.FONT_HERSHEY_COMPLEX, 0.5, color, 1)
 
-                    if (xmin > roi[0] and xmin < roi[0] + roi[2]) or (xmax > roi[0] and xmax < roi[0] + roi[2]) or (xmin < roi[0] and xmax > roi[0] + roi[2]):
-                        if(ymin > roi[1] and ymin < roi[1] + roi[3]) or (ymax > roi[1] and ymax < roi[1] + roi[3]) or (ymin < roi[1] and ymax > roi[1] + roi[3]):
-                            object_detected = True
-                            last_object = str(switch_class(class_id))
+                        if (xmin > roi[0] and xmin < roi[0] + roi[2]) or (xmax > roi[0] and xmax < roi[0] + roi[2]) or (xmin < roi[0] and xmax > roi[0] + roi[2]):
+                            if(ymin > roi[1] and ymin < roi[1] + roi[3]) or (ymax > roi[1] and ymax < roi[1] + roi[3]) or (ymin < roi[1] and ymax > roi[1] + roi[3]):
+                                object_detected = True
+                                last_object = str(switch_class(class_id))
 
-        if object_detected:
-            object_time = time.time()
-            object_detected = False
-            alarm = True
-        else:
-            if (time.time() - object_time > 2):
-                alarm = False
-        if alarm:
-            cv2.circle(frame, (25, 50), 10, (0, 0, 255), -1)
-            cv2.putText(frame, "Last object detected: " + last_object,
-                        (40, 55), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 1)
-        else:
-            cv2.circle(frame, (25, 50), 10, (0, 255, 0), -1)
-            cv2.putText(frame, "Nothing detected", (40, 55),
-                        cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0), 1)
+            if object_detected:
+                object_time = time.time()
+                object_detected = False
+                alarm = True
+            else:
+                if (time.time() - object_time > 2):
+                    alarm = False
+            if alarm:
+                cv2.circle(frame, (25, 20), 10, (0, 0, 255), -1)
+                cv2.putText(frame, "Last object detected: " + last_object,
+                            (40, 25), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 1)
+            else:
+                cv2.circle(frame, (25, 20), 10, (0, 255, 0), -1)
+                cv2.putText(frame, "Nothing detected", (40, 25),
+                            cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 255, 0), 1)
 
+            render_start = time.time()
+
+            if args.output:
+                out.write(frame)
+            if not args.hide_output:
+                cv2.imshow("Detection Results", frame)
+
+            render_end = time.time()
+            render_time = render_end - render_start
+
+        inf_end = time.time()
+        det_time = (inf_end - inf_start)/args.number_iter
+        print("Inference time: {:.1f} FPS".format(1 / det_time))
         # Draw performance stats
-        inf_time_message = "Inference time: N\A for async mode" if is_async_mode else \
-            "Inference time: {:.3f} ms".format(det_time * 1000)
-        render_time_message = "OpenCV rendering time: {:.3f} ms".format(
-            render_time * 1000)
-        async_mode_message = "Async mode is on. Processing request {}".format(cur_request_id) if is_async_mode else \
-            "Async mode is off. Processing request {}".format(cur_request_id)
-
-        cv2.putText(frame, inf_time_message, (15, 15),
-                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
-        cv2.putText(frame, render_time_message, (15, 30),
-                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
-        cv2.putText(frame, async_mode_message, (10, int(initial_h - 20)), cv2.FONT_HERSHEY_COMPLEX, 0.5,
-                    (10, 10, 200), 1)
-
-        render_start = time.time()
-
-        if args.output:
-            out.write(frame)
-        if not args.hide_output:
-            cv2.imshow("Detection Results", frame)
-
-        render_end = time.time()
-        render_time = render_end - render_start
-
-        if is_async_mode:
-            cur_request_id, next_request_id = next_request_id, cur_request_id
-            frame = next_frame
 
         key = cv2.waitKey(1)
         if key == ord('l'):
@@ -298,7 +258,6 @@ def main():
         if key == 27:
             break
         if (9 == key):
-            if exec_net.requests[cur_request_id].wait(-1) == 0:
                 is_async_mode = not is_async_mode
                 log.info("Switched to {} mode".format(
                     "async" if is_async_mode else "sync"))
