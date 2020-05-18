@@ -16,7 +16,7 @@ cmake_minimum_required (VERSION 3.10)
 
 include(CMakeLists_common.cmake)
 
-set(TARGET_NAME "multi_channel_object_detection_demo_yolov3")
+set(TARGET_NAME "blindspot-assistance")
 
 if( BUILD_DEMO_NAME AND NOT ${BUILD_DEMO_NAME} STREQUAL ${TARGET_NAME} )
     message(STATUS "DEMO ${TARGET_NAME} SKIPPED")

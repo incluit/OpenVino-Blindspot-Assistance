@@ -14,7 +14,7 @@
 
 cmake_minimum_required (VERSION 3.10)
 
-project(driver_behavior)
+project(blindspot-assistance)
 
 # environment variable InferenceEngine_DIR is used to find CMake files in installation 
 # point to common pieces in Inference Engine's samples directory
