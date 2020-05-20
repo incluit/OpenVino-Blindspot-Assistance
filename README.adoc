@@ -102,18 +102,18 @@ By now you should have completed the Linux installation guide for the OpenVINOâ„
 git clone https://github.com/incluit/OpenVino-Blindspot-Assistance.git
 ----
 
-**2.** Change to the top git repository:
+**2.** The first step is to configure the build environment for the OpenCV toolkit by sourcing the "setupvars.sh" script:
 
 [source,bash]
 ----
-cd OpenVino-Blindspot-Assistance
+source  /opt/intel/openvino/bin/setupvars.sh
 ----
 
-**3.** Install the requirements for the execution:
+**3.** Change to the BlindspotAssistance folder:
 
 [source,bash]
 ----
-pip3 install -r requirements.txt 
+cd OpenVino-Blindspot-Assistance/BlindspotAssistance/
 ----
 
 **4.** Download the necessary model
@@ -121,6 +121,36 @@ pip3 install -r requirements.txt
 [source,bash]
 ----
 bash scripts/download_models.sh
+----
+
+**5.** Create a directory to build the tutorial in and change to it.
+
+[source,bash]
+----
+mkdir build
+cd build
+----
+
+**6.** Before running each of the following sections, be sure to source the helper script. That will make it easier to use environment variables instead of long names to the models:
+
+[source,bash]
+----
+source ../scripts/setupenv.sh
+----
+
+**7.** Compile
+
+[source,bash]
+----
+cmake -DCMAKE_BUILD_TYPE=Release ../
+make
+----
+
+**8.** Move to the executableâ€™s dir:
+
+[source,bash]
+----
+cd intel64/Release
 ----
 
 === Build with Docker
@@ -157,24 +187,17 @@ cd OpenVino-Blindspot-Assistance
 **3.** Build the docker:
 [source,bash]
 ----
-docker build -t blindspot-assistance . --rm
+make docker-build
 ----
 
-**4.** Configure the display output with the following command:
-
-[source,bash]
-----
-xhost +
-----
-
-**5.** Run the  docker:
+**4.** Run the docker:
 
 [source,bash]
 ----
-docker run --net=host --env="DISPLAY" -it --device /dev/dri:/dev/dri --device-cgroup-rule='c 189:* rmw' -v /dev/bus/usb:/dev/bus/usb --device=/dev/video0 --volume="$HOME/.Xauthority:/root/.Xauthority:rw" blindspot-assistance /bin/bash
+make docker-run
 ----
 
-**6.** Continue with the following usage steps inside the Docker.
+**5.** Continue with the following usage steps inside the Docker.
 
 == Usage
 
@@ -184,60 +207,40 @@ Run the application with the `-h` option to see the usage message:
 
 [source,bash]
 ----
-python3 blindspot_assistance.py -h
+./blindspot-assistance -h
 ----
 
 Options:
 [source,bash]
 ----
-  -h, --help            Show this help message and exit.
-  -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model.
-  -i INPUT, --input INPUT
-                        Required. Path to video file, YouTube video (URL) and image. 'cam' for
-                        capturing video stream from camera.
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        path to a shared library with the kernels
-                        implementations.
-  -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
-                        look for a suitable plugin for device specified.
-                        Default value is CPU
-  --labels LABELS       Optional. Path to labels mapping file.
-  -pt PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
-                        Optional. Probability threshold for detections
-                        filtering.
-  -ct CPU_THREADS, --cpu_threads CPU_THREADS
-                        Optional. Specifies number of threads that CPU plugin should
-                        use for inference. Zero (default) means using all 
-                        (logical) cores.
-  -o FILE_PATH, --output FILE_PATH
-                        Optional. Save the video output. Define the path of the video file.
-  -h_o, --hide_output
-                        Optional. Hide the output.
+    -h                           Print a usage message
+    -m "<path>"                  Required. Path to an .xml file with a trained model.
+      -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations
+          Or
+      -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernel descriptions
+    -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
+    -nc                          Optional. Maximum number of processed camera inputs (web cameras)
+    -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
+    -nireq                       Optional. Number of infer requests
+    -n_iqs                       Optional. Frame queue size for input channels
+    -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
+    -n_sp                        Optional. Number of sampling periods
+    -pc                          Optional. Enable per-layer performance report
+    -t                           Optional. Probability threshold for detections
+    -no_show                     Optional. Do not show processed video
+    -show_stats                  Optional. Enable statistics report
+    -duplicate_num               Optional. Enable and specify the number of channels additionally copied from real sources
+    -real_input_fps              Optional. Disable input frames caching for maximum throughput pipeline
+    -i                           Optional. Specify full path to input video files
+    -loop_video                  Optional. Enable playing video on a loop.
+    -u                           Optional. List of monitors to show initially.
 ----
 
 Example:
 
 [source,bash]
 ----
-python3 blindspot_assistance.py -m models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -i <path_to_video>/<video>.mp4 -pt 0.5 -d GPU
-----
-
-If using the native camera:
-
-[source,bash]
-----
-python3 blindspot_assistance.py -m models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -i cam -d GPU
-----
-
-If using an USB camera:
-
-[source,bash]
-----
-python3 blindspot_assistance.py -m models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -i /dev/video1 -d GPU
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRight.mp4 -show-stats -t 0.5
 ----
 
 ===== Other models

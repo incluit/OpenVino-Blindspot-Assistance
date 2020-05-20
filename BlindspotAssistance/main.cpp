@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 /**
-* \brief The entry point for the Inference Engine multichannel_face_detection demo application
-* \file multichannel_face_detection/main.cpp
-* \example multichannel_face_detection/main.cpp
+* \brief The entry point for the Inference Engine blindspot_assistance application
+* \file BlindspotAssistance/main.cpp
+* \example BlindspotAssistance/main.cpp
 */
 #include <iostream>
 #include <vector>
@@ -45,7 +45,7 @@ namespace {
 */
 void showUsage() {
     std::cout << std::endl;
-    std::cout << "multi_channel_face_detection_demo [OPTION]" << std::endl;
+    std::cout << "blindspot_assistance [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                           " << help_message << std::endl;
@@ -168,16 +168,16 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
 
     auto drawStats = [&]() {
         if (FLAGS_show_stats && !stats.empty()) {
-            static const cv::Point posPoint = cv::Point(2*DISP_WIDTH/4, 4*DISP_HEIGHT/5);
+            static const cv::Point posPoint = cv::Point(20, 20);
             auto pos = posPoint + cv::Point(0, 25);
             size_t currPos = 0;
             while (true) {
                 auto newPos = stats.find('\n', currPos);
-                cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.8,  cv::Scalar(0, 0, 255), 1);
+                cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.5,  cv::Scalar(0, 255, 0), 1);
                 if (newPos == std::string::npos) {
                     break;
                 }
-                pos += cv::Point(0, 25);
+                pos += cv::Point(0, 15);
                 currPos = newPos + 1;
             }
         }
@@ -200,7 +200,7 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
 
     char str[256];
     snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f/time));
-    cv::putText(windowImage, str, cv::Point(DISP_WIDTH/2, 100), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
+    cv::putText(windowImage, str, cv::Point(15, 20), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.5,  cv::Scalar(0, 255, 0), 2);
     cv::imshow(params.name, windowImage);
 }
 
