@@ -1,9 +1,4 @@
-make docker-build
-
-make docker-run
-
-
-= OpenVino Blindspot Assistance
+# OpenVino Blindspot Assistance
 :idprefix:
 :idseparator: -
 :sectanchors:
