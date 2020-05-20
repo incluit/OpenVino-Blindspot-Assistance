@@ -1,2 +1,0 @@
-pafy
-youtube_dl
