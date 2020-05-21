@@ -1,2 +1,2 @@
-run-blindspot: 
+run: 
 	./blindspot-assistance -m ../../../models/FP16/pedestrian-and-vehicle-detector-adas-0001.xml -d CPU -i ../../../data/blindspot1.mp4 ../../../data/blindspot3.mp4 ../../../data/blindspot4.mp4 ../../../data/blindspot2.mp4 -show-stats -t 0.5
