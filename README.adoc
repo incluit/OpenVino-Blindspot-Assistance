@@ -225,11 +225,48 @@ Options:
     -u                           Optional. List of monitors to show initially.
 ----
 
-Example:
+=== Examples
+
+**1.** Using 4 video files, using CPU and GPU:
 
 [source,bash]
 ----
-./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -show-stats -t 0.5
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4
+----
+
+**2.** Using 3 video files and 1 camera (`-nc 1`):
+
+[source,bash]
+----
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 -nc 1
+----
+
+**3.** Using 4 video files, showing statistics report (`-show_stats`):
+
+[source,bash]
+----
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -show_stats
+----
+
+**4.** Using 4 video files, without video output (`-no_show`). Average performance is displayed on the console.
+
+[source,bash]
+----
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -no_show
+----
+
+**5.** Using 4 video files, without detected objects (`-no_show_d`). 
+
+[source,bash]
+----
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -no_show_d
+----
+
+**5.** Using 4 video files, changing the probability threshold for detections (`-t 0.1`). 
+
+[source,bash]
+----
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -t 0.1
 ----
 
 ===== Other models
@@ -238,3 +275,13 @@ You can also experiment by using different face detection models, being the ones
 
 . person-vehicle-bike-detection-crossroad-0078
 . person-vehicle-bike-detection-crossroad-1016
+
+[source,bash]
+----
+./blindspot-assistance -m ../../../models/FP32/person-vehicle-bike-detection-crossroad-0078.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4
+----
+
+[source,bash]
+----
+./blindspot-assistance -m ../../../models/FP32/person-vehicle-bike-detection-crossroad-1016.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4
+----
