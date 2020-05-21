@@ -224,8 +224,8 @@ namespace
         {
             char str[256];
             snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f / time));
-            cv::putText(windowImage, str, cv::Point(8, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(0, 0, 0), 5);
-            cv::putText(windowImage, str, cv::Point(8, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(255, 255, 255), 2);
+            cv::putText(windowImage, str, cv::Point(15, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(0, 0, 0), 5);
+            cv::putText(windowImage, str, cv::Point(15, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(255, 255, 255), 2);
         }
         cv::imshow(params.name, windowImage);
     }
