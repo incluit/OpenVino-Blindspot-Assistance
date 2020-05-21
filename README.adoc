@@ -11,18 +11,9 @@
 
 toc::[]
 
-== Foreword
-This is a follow-up on the OpenVino's demo:
-
-https://docs.openvinotoolkit.org/latest/_demos_python_demos_object_detection_demo_ssd_async_README.html
-
-We will work on and extend this tutorial as a demo app for blindspot detection.
-
 == Introduction
 
-This project consists on showcasing the advantages of the Intel's OpenVINO toolkit. We will develop a __Blindspot Assistance__ case scenario, where we will define a blindspot area to detect vehicles and pedestrians. For that, we will use the OpenVINO toolkit and OpenCV, all written in `Python`.
-
-As mentioned previously, we will take the https://docs.openvinotoolkit.org/latest/_demos_python_demos_object_detection_demo_ssd_async_README.html[Object Detection SSD Python* Demo] as a starting point.
+This project consists on showcasing the advantages of the Intel's OpenVINO toolkit. We will develop a __Blindspot Assistance__ case scenario, where we will define a blindspot area to detect vehicles and pedestrians, up to 16 cameras simultaneously. For that, we will use the OpenVINO toolkit and OpenCV.
 
 === [Optional] AWS (In Progress)
 
@@ -45,8 +36,6 @@ If to be used, any optional hardware must also be installed and verified includi
 * Intel® Core™ CPU with integrated graphics.
 
 * VPU - USB Intel® Movidius™ Neural Compute Stick and what is being referred to as "Myriad"
-
-* Python3-PIP
 
 A summary of what is needed:
 
@@ -192,7 +181,11 @@ make docker-build
 make docker-run
 ----
 
-**5.** Continue with the following usage steps inside the Docker.
+**5.** Run the example inside the Docker.
+[source,bash]
+----
+make run
+----
 
 == Usage
 
@@ -235,7 +228,7 @@ Example:
 
 [source,bash]
 ----
-./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRight.mp4 -show-stats -t 0.5
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -show-stats -t 0.5
 ----
 
 ===== Other models
