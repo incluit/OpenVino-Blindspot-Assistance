@@ -19,6 +19,7 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
                                                  "Absolute path to a shared library with the kernels implementations";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
+static const char no_show_detection[] = "Optional. Do not show detected objects.";
 static const char num_cameras[] = "Optional. Maximum number of processed camera inputs (web cameras)";
 static const char batch_size[] = "Optional. Batch size for processing (the number of frames processed per infer request)";
 static const char num_infer_requests[] = "Optional. Number of infer requests";
@@ -39,6 +40,7 @@ DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
+DEFINE_bool(no_show_d, false, no_show_detection);
 DEFINE_uint32(nc, 0, num_cameras);
 DEFINE_uint32(bs, 1, batch_size);
 DEFINE_uint32(nireq, 5, num_infer_requests);

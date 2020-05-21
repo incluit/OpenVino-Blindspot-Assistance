@@ -181,7 +181,7 @@ make docker-build
 make docker-run
 ----
 
-**5.** Run the example inside the Docker.
+**5.** Run the example inside the Docker or try the detailed examples in Usage.
 [source,bash]
 ----
 make run
@@ -216,6 +216,7 @@ Options:
     -pc                          Optional. Enable per-layer performance report
     -t                           Optional. Probability threshold for detections
     -no_show                     Optional. Do not show processed video
+    -no_show_d                   Optional. Optional. Do not show detected objects.
     -show_stats                  Optional. Enable statistics report
     -duplicate_num               Optional. Enable and specify the number of channels additionally copied from real sources
     -real_input_fps              Optional. Disable input frames caching for maximum throughput pipeline
