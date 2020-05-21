@@ -13,7 +13,7 @@ toc::[]
 
 == Introduction
 
-This project consists on showcasing the advantages of the Intel's OpenVINO toolkit. We will develop a __Blindspot Assistance__ case scenario, where we will define a blindspot area to detect vehicles and pedestrians, up to 16 cameras simultaneously. For that, we will use the OpenVINO toolkit and OpenCV.
+This project consists on showcasing the advantages of the Intel's OpenVINO toolkit. We will develop a __Blindspot Assistance__ case scenario, where we will define a blindspot area to detect vehicles and pedestrians, up to 4 cameras simultaneously. For that, we will use the OpenVINO toolkit and OpenCV.
 
 === [Optional] AWS (In Progress)
 
