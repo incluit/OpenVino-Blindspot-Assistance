@@ -112,18 +112,16 @@ namespace
         return true;
     }
 
-    struct Object
+    struct Detection
     {
         cv::Rect2f rect;
         float confidence;
-        unsigned char age;
-        unsigned char gender;
-        Object(cv::Rect2f r, float c, unsigned char a, unsigned char g) : rect(r), confidence(c), age(a), gender(g) {}
+        Detection(cv::Rect2f r, float c) : rect(r), confidence(c) {}
     };
 
-    void drawDetections(cv::Mat &img, const std::vector<Object> &detections)
+    void drawDetections(cv::Mat &img, const std::vector<Detection> &detections)
     {
-        for (const Object &f : detections)
+        for (const Detection &f : detections)
         {
             cv::Rect ri(static_cast<int>(f.rect.x * img.cols), static_cast<int>(f.rect.y * img.rows),
                         static_cast<int>(f.rect.width * img.cols), static_cast<int>(f.rect.height * img.rows));
@@ -181,7 +179,7 @@ namespace
                 cv::resize(elem->frame, windowPart, params.frameSize);
                 if (!FLAGS_no_show_d)
                 {
-                    drawDetections(windowPart, elem->detections.get<std::vector<Object>>());
+                    drawDetections(windowPart, elem->detections.get<std::vector<Detection>>());
                 }
             }
         };
@@ -360,7 +358,7 @@ int main(int argc, char *argv[])
 
             std::vector<Detections> detections(FLAGS_bs);
             for (auto& d : detections) {
-                d.set(new std::vector<Object>);
+                d.set(new std::vector<Detection>);
             }
 
             for (size_t i = 0; i < total; i+=7) {
@@ -373,7 +371,7 @@ int main(int argc, char *argv[])
                     float y1 = std::min(std::max(0.0f, dataPtr[i + 6]), 1.0f);
 
                     cv::Rect2f rect = {x0 , y0, x1-x0, y1-y0};
-                    detections[idxInBatch].get<std::vector<Object>>().emplace_back(rect, conf, 0, 0);
+                    detections[idxInBatch].get<std::vector<Detection>>().emplace_back(rect, conf);
                 }
             }
             return detections; });

@@ -11,7 +11,7 @@ COPY BlindspotAssistance/* app/
 WORKDIR /app/BlindspotAssistance
 RUN mkdir build
 WORKDIR /app/BlindspotAssistance/build
-RUN /bin/bash -c 'source /opt/intel/openvino/bin/setupvars.sh && cmake -DCMAKE_BUILD_TYPE=Release ../ && make'
+RUN /bin/bash -c 'source /opt/intel/openvino/bin/setupvars.sh && cmake -DCMAKE_BUILD_TYPE=Release -MULTICHANNEL_DEMO_USE_TBB=ON ../ && make'
 
 COPY BlindspotAssistance/Makefile /app/BlindspotAssistance/build/intel64/Release
 RUN /bin/bash -c 'source /opt/intel/openvino/bin/setupvars.sh && bash ../scripts/download_models.sh'
