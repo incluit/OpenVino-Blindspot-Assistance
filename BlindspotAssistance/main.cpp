@@ -190,17 +190,18 @@ namespace
             if (FLAGS_show_stats && !stats.empty())
             {
                 static const cv::Point posPoint = cv::Point(20, 20);
-                auto pos = posPoint + cv::Point(0, 25);
+                auto pos = posPoint + cv::Point(0, 35);
                 size_t currPos = 0;
                 while (true)
                 {
                     auto newPos = stats.find('\n', currPos);
-                    cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(0, 255, 0), 1);
+                    cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos , cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(0, 0, 0), 2);
+                    cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(255, 255, 255), 1);
                     if (newPos == std::string::npos)
                     {
                         break;
                     }
-                    pos += cv::Point(0, 15);
+                    pos += cv::Point(0, 25);
                     currPos = newPos + 1;
                 }
             }
@@ -225,7 +226,8 @@ namespace
         {
             char str[256];
             snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f / time));
-            cv::putText(windowImage, str, cv::Point(15, 20), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+            cv::putText(windowImage, str, cv::Point(8, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(0, 0, 0), 5);
+            cv::putText(windowImage, str, cv::Point(8, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(255, 255, 255), 2);
         }
         cv::imshow(params.name, windowImage);
     }
