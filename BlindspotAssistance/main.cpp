@@ -115,17 +115,29 @@ namespace
     struct Detection
     {
         cv::Rect2f rect;
+        int label;
         float confidence;
-        Detection(cv::Rect2f r, float c) : rect(r), confidence(c) {}
+        Detection(cv::Rect2f r,int l, float c) : rect(r), label(l), confidence(c) {}
     };
 
     void drawDetections(cv::Mat &img, const std::vector<Detection> &detections)
     {
+        cv::Scalar color;
         for (const Detection &f : detections)
         {
+            if(f.label == 1)
+            {
+                color = cv::Scalar(255, 0, 0);
+            } else if(f.label == 2)
+            {
+                color = cv::Scalar(0, 255, 0);
+            } else
+            {
+                color = cv::Scalar(0, 0, 255);
+            }
             cv::Rect ri(static_cast<int>(f.rect.x * img.cols), static_cast<int>(f.rect.y * img.rows),
                         static_cast<int>(f.rect.width * img.cols), static_cast<int>(f.rect.height * img.rows));
-            cv::rectangle(img, ri, cv::Scalar(255, 0, 0), 2);
+            cv::rectangle(img, ri, color, 2);
         }
     }
 
@@ -363,6 +375,7 @@ int main(int argc, char *argv[])
 
             for (size_t i = 0; i < total; i+=7) {
                 float conf = dataPtr[i + 2];
+                float label = dataPtr[i + 1];
                 if (conf > FLAGS_t) {
                     int idxInBatch = static_cast<int>(dataPtr[i]);
                     float x0 = std::min(std::max(0.0f, dataPtr[i + 3]), 1.0f);
@@ -371,7 +384,7 @@ int main(int argc, char *argv[])
                     float y1 = std::min(std::max(0.0f, dataPtr[i + 6]), 1.0f);
 
                     cv::Rect2f rect = {x0 , y0, x1-x0, y1-y0};
-                    detections[idxInBatch].get<std::vector<Detection>>().emplace_back(rect, conf);
+                    detections[idxInBatch].get<std::vector<Detection>>().emplace_back(rect, label, conf);
                 }
             }
             return detections; });
