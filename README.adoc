@@ -186,11 +186,36 @@ make docker-build
 make docker-run
 ----
 
-**5.** Run the example inside the Docker or try the detailed examples in Usage.
+==== Run
+
+**1.** Run the example inside the Docker or try the detailed examples in Usage.
 [source,bash]
 ----
 make run
 ----
+
+**2** If you get out of the Docker, you can run it again:
+[source,bash]
+----
+docker start blindspotcont
+docker exec -it blindspotcont /bin/bash
+---- 
+
+==== Troubleshooting
+
+**1.** If you receive the following message inside the Docker:
+[source,bash]
+----
+Gtk-WARNING **: 13:01:52.097: cannot open display: :0
+----
+
+Go outside the Docker container, run:
+[source,bash]
+----
+xhost +
+----
+Enter the Docker container and run it again.
+
 
 == Usage
 

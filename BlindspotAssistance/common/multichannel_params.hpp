@@ -32,6 +32,8 @@ static const char real_input_fps[] = "Optional. Disable input frames caching, fo
 static const char input_video[] = "Optional. Specify full path to input video files";
 static const char loop_video_output_message[] = "Optional. Enable playing video on a loop.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char calibration_message[] = "Optional. Camera calibration.";
+static const char show_calibration_message[] = "Optional. Show camera calibration.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(m, "", model_path_message);
@@ -53,3 +55,5 @@ DEFINE_bool(real_input_fps, false, real_input_fps);
 DEFINE_string(i, "", input_video);
 DEFINE_bool(loop_video, false, loop_video_output_message);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_bool(calibration, false, calibration_message);
+DEFINE_bool(show_calibration, false, show_calibration_message);
