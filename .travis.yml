@@ -1,5 +1,5 @@
 dist: bionic
-language: cpp
+# language: cpp
 sudo: required
 services:
   - docker
