@@ -4,7 +4,6 @@ services:
 
 before_install:
   - sudo apt-get update
-  - xhost +
 
 before_script:
   - docker build -t blindspot-incluit .
