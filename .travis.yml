@@ -1,6 +1,8 @@
-# dist: bionic
-# language: cpp
-sudo: required
+os: linux
+dist: xenial
+edge: true
+language: cpp
+
 services:
   - docker
 
@@ -13,7 +15,7 @@ before_script:
 script:
   - docker run --name blindspotcont -t -d blindspot-incluit
   - docker exec blindspotcont bash -c 'cd /app/BlindspotAssistance/build && build-wrapper-linux-x86-64 --out-dir bw-output make clean all'
-  - docker exec blindspotcont bash -c 'cd /app/BlindspotAssistance/build &&sonar-scanner -Dsonar.projectKey=incluit_OpenVino-Blindspot-Assistance -Dsonar.organization=incluit -Dsonar.sources=. -Dsonar.cfamily.build-wrapper-output=bw-output -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectBaseDir=../src -Dproject.home=../src -Dsonar.login=2bf3932075197b2c75e5a9e2a138c8921f7cc0a2'
+  - docker exec blindspotcont bash -c 'cd /app/BlindspotAssistance/build && sonar-scanner -Dsonar.projectKey=incluit_OpenVino-Blindspot-Assistance -Dsonar.organization=incluit -Dsonar.sources=. -Dsonar.cfamily.build-wrapper-output=bw-output -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectBaseDir=../src -Dproject.home=../src -Dsonar.login=2bf3932075197b2c75e5a9e2a138c8921f7cc0a2'
 
 after_script:
   - docker images
