@@ -1,6 +1,5 @@
 os: linux
-dist: xenial
-edge: true
+dist: bionic
 language: cpp
 
 addons:
