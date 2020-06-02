@@ -12,7 +12,7 @@ before_script:
   - docker build -t blindspot-incluit .
 
 script:
-  - docker run --name blindspotcont -t -d --volume="$$HOME/.Xauthority:/root/.Xauthority:rw" blindspot-incluit
+  - docker run --name blindspotcont -t -d --volume="$HOME/.Xauthority:/root/.Xauthority:rw" blindspot-incluit
 
 after_script:
   - docker images
