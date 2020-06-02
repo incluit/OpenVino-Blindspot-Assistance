@@ -6,8 +6,7 @@ language: cpp
 addons:
   sonarcloud:
     organization: "incluit" # the key of the org you chose at step #3
-    token:
-      secure: "2bf3932075197b2c75e5a9e2a138c8921f7cc0a2"
+    token: ${SONAR_TOKEN}
 
 services:
   - docker
