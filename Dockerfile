@@ -4,8 +4,7 @@ ADD . /app
 WORKDIR /app
 
 USER root
-#RUN apt-get update && apt-get -y upgrade && apt-get autoremove  
-#####Comentado para reducir tiempo de build
+RUN apt-get update && apt-get -y upgrade && apt-get autoremove  
 
 COPY BlindspotAssistance/* app/
 WORKDIR /app/BlindspotAssistance
