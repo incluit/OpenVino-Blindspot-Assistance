@@ -1,0 +1,18 @@
+os: linux
+dist: bionic
+language: cpp
+
+services:
+  - docker
+
+before_install:
+  - sudo apt-get update
+
+before_script:
+  - docker build -t blindspot-incluit .
+
+script:
+  - docker run --name blindspotcont -t -d --volume="$HOME/.Xauthority:/root/.Xauthority:rw" blindspot-incluit
+
+after_script:
+  - docker images
