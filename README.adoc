@@ -143,10 +143,6 @@ make
 cd intel64/Release
 ----
 
-=== Build in DockerHub
-The master brach of this repository is built in Docker Hub:
-https://hub.docker.com/repository/docker/openvinoincluit/blindspot-openvino/general
-
 
 === Build with Docker
 
@@ -185,42 +181,9 @@ cd OpenVino-Blindspot-Assistance
 make docker-build
 ----
 
-**4.** Run the docker:
-
-[source,bash]
-----
-make docker-run
-----
-
-==== Run
-
-**1.** Run the example inside the Docker or try the detailed examples in Usage.
-[source,bash]
-----
-make run
-----
-
-**2** If you get out of the Docker, you can run it again:
-[source,bash]
-----
-docker start blindspotcont
-docker exec -it blindspotcont /bin/bash
----- 
-
-==== Troubleshooting
-
-**1.** If you receive the following message inside the Docker:
-[source,bash]
-----
-Gtk-WARNING **: 13:01:52.097: cannot open display: :0
-----
-
-Go outside the Docker container, run:
-[source,bash]
-----
-xhost +
-----
-Enter the Docker container and run it again.
+=== Build in DockerHub
+The master brach of this repository is built in Docker Hub:
+https://hub.docker.com/repository/docker/openvinoincluit/blindspot-openvino/general
 
 === MQTT Broker Instalation
 
@@ -266,7 +229,7 @@ Options:
     -u                           Optional. List of monitors to show initially.
 ----
 
-=== Examples
+==== Examples
 
 **1.** Using 4 video files, using CPU and GPU:
 
@@ -326,3 +289,40 @@ You can also experiment by using different face detection models, being the ones
 ----
 ./blindspot-assistance -m ../../../models/FP32/person-vehicle-bike-detection-crossroad-1016.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4
 ----
+
+==== Run in Docker
+**1.** Run the docker:
+
+[source,bash]
+----
+make docker-run
+----
+
+**2.** Run the example inside the Docker or try the detailed examples in Usage.
+[source,bash]
+----
+make run
+----
+
+**3** If you get out of the Docker, you can run it again:
+[source,bash]
+----
+docker start blindspotcont
+docker exec -it blindspotcont /bin/bash
+---- 
+
+
+== Troubleshooting
+
+**1.** If you receive the following message inside the Docker:
+[source,bash]
+----
+Gtk-WARNING **: 13:01:52.097: cannot open display: :0
+----
+
+Go outside the Docker container, run:
+[source,bash]
+----
+xhost +
+----
+Enter the Docker container and run it again.
