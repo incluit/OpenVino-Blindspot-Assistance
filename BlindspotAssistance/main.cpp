@@ -120,7 +120,7 @@ namespace
         cv::Rect2f rect;
         int label;
         float confidence;
-        Detection(cv::Rect2f r,int l, float c) : rect(r), label(l), confidence(c) {}
+        Detection(cv::Rect2f r, int l, float c) : rect(r), label(l), confidence(c) {}
     };
 
     void drawDetections(cv::Mat &img, const std::vector<Detection> &detections)
@@ -128,13 +128,15 @@ namespace
         cv::Scalar color;
         for (const Detection &f : detections)
         {
-            if(f.label == 1)
+            if (f.label == 1)
             {
                 color = cv::Scalar(255, 0, 0);
-            } else if(f.label == 2)
+            }
+            else if (f.label == 2)
             {
                 color = cv::Scalar(0, 255, 0);
-            } else
+            }
+            else
             {
                 color = cv::Scalar(0, 0, 255);
             }
@@ -208,7 +210,7 @@ namespace
                 while (true)
                 {
                     auto newPos = stats.find('\n', currPos);
-                    cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos , cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(0, 0, 0), 2);
+                    cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(0, 0, 0), 2);
                     cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(255, 255, 255), 1);
                     if (newPos == std::string::npos)
                     {

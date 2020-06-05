@@ -14,6 +14,7 @@ Status]]
 https://sonarcloud.io/dashboard?id=incluit_OpenVino-Blindspot-Assistance[image:https://sonarcloud.io/api/project_badges/measure?project=incluit_OpenVino-Blindspot-Assistance&metric=alert_status[Sonarcloud
 Status]]
 
+
 toc::[]
 
 == Introduction
