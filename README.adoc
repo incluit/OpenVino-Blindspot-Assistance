@@ -21,9 +21,6 @@ toc::[]
 
 This project consists on showcasing the advantages of the Intel's OpenVINO toolkit. We will develop a __Blindspot Assistance__ case scenario, where we will define a blindspot area to detect vehicles and pedestrians, up to 4 cameras simultaneously. For that, we will use the OpenVINO toolkit and OpenCV.
 
-=== [Optional] AWS (In Progress)
-
-We also plan to send the data through MQTT using AWS IoT-Core. Using AWS may incur in a cost, so this will also be optional for you to run with/without it.
 
 == Bussines Logic
 
@@ -183,9 +180,20 @@ make docker-build
 
 === Build in DockerHub
 The master brach of this repository is built in Docker Hub:
-https://hub.docker.com/repository/docker/openvinoincluit/blindspot-openvino/general
+
+https://hub.docker.com/r/openvinoincluit/blindspot-openvino
+
+You can pull the blindspot assistance Docker image using: 
+
+----
+docker pull openvinoincluit/blindspot-openvino
+----
 
 === MQTT Broker Instalation
+
+We are using Mosquitto MQTT broker to handle all the messages from blindspot assistance.
+
+To run Mosquitto broker in the base system use:
 
 ----
 docker run -d --rm --name broker -p 1883:1883 eclipse-mosquitto
@@ -273,7 +281,7 @@ Options:
 ./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -t 0.1
 ----
 
-===== Other models
+==== Other models
 
 You can also experiment by using different face detection models, being the ones available up to now:
 
@@ -326,3 +334,7 @@ Go outside the Docker container, run:
 xhost +
 ----
 Enter the Docker container and run it again.
+
+== [Optional] AWS (In Progress)
+
+We also plan to send the data through MQTT using AWS IoT-Core. Using AWS may incur in a cost, so this will also be optional for you to run with/without it.
