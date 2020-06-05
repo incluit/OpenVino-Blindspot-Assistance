@@ -143,6 +143,11 @@ make
 cd intel64/Release
 ----
 
+=== Build in DockerHub
+The master brach of this repository is built in Docker Hub:
+https://hub.docker.com/repository/docker/openvinoincluit/blindspot-openvino/general
+
+
 === Build with Docker
 
 ==== Prerequisites
