@@ -4,7 +4,22 @@ ADD . /app
 WORKDIR /app
 
 USER root
-RUN apt-get update && apt-get -y upgrade && apt-get autoremove  
+
+RUN apt-get update && apt-get -y upgrade && apt-get autoremove
+
+RUN apt-get install -y --no-install-recommends \
+        build-essential \
+        git \
+        gcc \
+        make \
+        cmake \
+        cmake-gui\
+        cmake-curses-gui \
+        libssl-dev \
+        sudo
+
+RUN /bin/bash -c 'git clone https://github.com/eclipse/paho.mqtt.c.git && cd paho.mqtt.c && git checkout v1.3.1 && cmake -Bbuild -H. -DPAHO_WITH_SSL=ON -DPAHO_ENABLE_TESTING=OFF && sudo cmake --build build/ --target install && sudo ldconfig'
+RUN /bin/bash -c 'git clone https://github.com/eclipse/paho.mqtt.cpp && cd paho.mqtt.cpp && cmake -Bbuild -H. -DPAHO_BUILD_DOCUMENTATION=FALSE -DPAHO_BUILD_SAMPLES=TRUE && sudo cmake --build build/ --target install && sudo ldconfig'
 
 COPY BlindspotAssistance/* app/
 WORKDIR /app/BlindspotAssistance

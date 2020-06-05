@@ -72,6 +72,7 @@ endif()
 
 add_subdirectory(common)
 target_link_libraries(${TARGET_NAME} ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} ngraph::ngraph common)
+target_link_libraries(${TARGET_NAME} paho-mqttpp3 paho-mqtt3as)
 
 if(UNIX)
     target_link_libraries( ${TARGET_NAME} pthread)

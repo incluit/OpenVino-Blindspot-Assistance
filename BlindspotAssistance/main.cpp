@@ -38,6 +38,9 @@
 #include "threading.hpp"
 #include "graph.hpp"
 
+#include "mqtt.hpp"
+#include "mqtt/async_client.h"
+
 namespace
 {
 
@@ -428,6 +431,36 @@ int main(int argc, char *argv[])
 
         output.start();
 
+        ////////////    MQTT Client Init  ////////////////
+        string	address  = "tcp://localhost:1883";
+        string  clientID = "async_publish";
+        cout << "Initializing for server '" << address << "'..." << endl;
+	    mqtt::async_client client(address, clientID);
+
+        callback cb;
+     	client.set_callback(cb);
+
+        mqtt::connect_options conopts;
+        mqtt::message willmsg(TOPIC, PAYLOAD, 1, true);
+        mqtt::will_options will(willmsg);
+        conopts.set_will(will);
+        mqtt::token_ptr conntok;
+
+        cout << "  ...OK" << endl;
+
+        try {
+            cout << "\nConnecting..." << endl;
+            conntok = client.connect(conopts);
+            cout << "Waiting for the connection..." << endl;
+            conntok->wait();
+            cout << "  ...OK" << endl;
+        }
+        catch (const mqtt::exception& exc) {
+            cerr << exc.what() << endl;
+        }
+        /////////////////////////////
+
+
         using timer = std::chrono::high_resolution_clock;
         using duration = std::chrono::duration<float, std::milli>;
         timer::time_point lastTime = timer::now();
@@ -466,6 +499,12 @@ int main(int argc, char *argv[])
                 }
             }
             ++fpsCounter;
+            
+            // Test msg
+            cout << "\nSending message..." << endl;
+            mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, "test");
+            pubmsg->set_qos(QOS);
+            client.publish(pubmsg)->wait_for(TIMEOUT);
 
             if (!output.isAlive())
             {
@@ -534,6 +573,13 @@ int main(int argc, char *argv[])
                 }
             }
         }
+
+        //// Disconnect MQTT
+        cout << "\nDisconnecting..." << endl;
+		conntok = client.disconnect();
+		conntok->wait();
+		cout << "  ...OK" << endl;
+        ////
 
         network.reset();
 

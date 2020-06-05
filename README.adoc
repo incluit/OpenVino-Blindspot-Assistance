@@ -217,6 +217,11 @@ xhost +
 ----
 Enter the Docker container and run it again.
 
+=== MQTT Broker Instalation
+
+----
+docker run -d --rm --name broker -p 1883:1883 eclipse-mosquitto
+----
 
 == Usage
 
