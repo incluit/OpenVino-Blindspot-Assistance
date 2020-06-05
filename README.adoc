@@ -15,6 +15,9 @@ https://sonarcloud.io/dashboard?id=incluit_OpenVino-Blindspot-Assistance[image:h
 Status]]
 ![Docker Build Status](https://img.shields.io/docker/build/openvinoincluit/blindspot-openvino?style=plastic)
 
+
+https://img.shields.io/docker/build/openvinoincluit/blindspot-openvino?style=plastic
+
 toc::[]
 
 == Introduction
