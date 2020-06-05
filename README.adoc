@@ -13,6 +13,7 @@ https://travis-ci.org/incluit/OpenVino-Blindspot-Assistance[image:https://travis
 Status]]
 https://sonarcloud.io/dashboard?id=incluit_OpenVino-Blindspot-Assistance[image:https://sonarcloud.io/api/project_badges/measure?project=incluit_OpenVino-Blindspot-Assistance&metric=alert_status[Sonarcloud
 Status]]
+![Docker Build Status](https://img.shields.io/docker/build/openvinoincluit/blindspot-openvino?style=plastic)
 
 toc::[]
 
