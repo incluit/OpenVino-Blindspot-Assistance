@@ -20,6 +20,7 @@
 #include <sstream>
 #include <memory>
 #include <string>
+#include <fstream>
 
 #ifdef USE_TBB
 #include <tbb/parallel_for.h>
@@ -75,6 +76,7 @@ namespace
         std::cout << "    -i                           " << input_video << std::endl;
         std::cout << "    -loop_video                  " << loop_video_output_message << std::endl;
         std::cout << "    -u                           " << utilization_monitors_message << std::endl;
+        std::cout << "    -show_calibration            " << show_calibration_message << std::endl;
     }
 
     bool ParseAndCheckCommandLine(int argc, char *argv[])
@@ -264,6 +266,39 @@ int main(int argc, char *argv[])
             return 0;
         }
 
+        /*         std::ifstream pointsFile;
+        pointsFile.open("../../../utils/points.ini");
+        if (!pointsFile) {
+            std::cout << "Unable to upload init area configuration";
+            exit(1); 
+        }
+        float a;
+        while (pointsFile >> a) {
+            printf("%f ", a);
+        }
+        pointsFile.close(); */
+
+        // Read area points from CSV
+        std::ifstream pointsFile("../../../utils/points.ini");
+        std::string line;
+        int i = 0;
+        int points[4][4];
+        if (!pointsFile.is_open()) // Check if file is really open
+        {
+            std::cout << "Unable to upload init Area Configuration" << endl;
+        }
+        else
+        {
+            std::cout << "Reading Area Configuration" << endl;
+            while (getline(pointsFile, line))
+            {
+                std::stringstream sst(line);
+                sst >> points[i][0] >> points[i][1] >> points[i][2] >> points[i][3];
+                std::cout << "Cam Area " << i + 1 << ": " << points[i][0] << ',' << points[i][1] << ',' << points[i][2] << ',' << points[i][3] << endl;
+                i++;
+            }
+        }
+
         std::string modelPath = FLAGS_m;
         std::size_t found = modelPath.find_last_of(".");
         if (found > modelPath.size())
@@ -432,13 +467,13 @@ int main(int argc, char *argv[])
         output.start();
 
         ////////////    MQTT Client Init  ////////////////
-        string	address  = "tcp://localhost:1883";
-        string  clientID = "async_publish";
+        string address = "tcp://localhost:1883";
+        string clientID = "async_publish";
         cout << "Initializing for server '" << address << "'..." << endl;
-	    mqtt::async_client client(address, clientID);
+        mqtt::async_client client(address, clientID);
 
         callback cb;
-     	client.set_callback(cb);
+        client.set_callback(cb);
 
         mqtt::connect_options conopts;
         mqtt::message willmsg(TOPIC, PAYLOAD, 1, true);
@@ -448,18 +483,19 @@ int main(int argc, char *argv[])
 
         cout << "  ...OK" << endl;
 
-        try {
+        try
+        {
             cout << "\nConnecting..." << endl;
             conntok = client.connect(conopts);
             cout << "Waiting for the connection..." << endl;
             conntok->wait();
             cout << "  ...OK" << endl;
         }
-        catch (const mqtt::exception& exc) {
+        catch (const mqtt::exception &exc)
+        {
             cerr << exc.what() << endl;
         }
         /////////////////////////////
-
 
         using timer = std::chrono::high_resolution_clock;
         using duration = std::chrono::duration<float, std::milli>;
@@ -499,7 +535,7 @@ int main(int argc, char *argv[])
                 }
             }
             ++fpsCounter;
-            
+
             // Test msg
             cout << "\nSending message..." << endl;
             mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, "test");
@@ -576,9 +612,9 @@ int main(int argc, char *argv[])
 
         //// Disconnect MQTT
         cout << "\nDisconnecting..." << endl;
-		conntok = client.disconnect();
-		conntok->wait();
-		cout << "  ...OK" << endl;
+        conntok = client.disconnect();
+        conntok->wait();
+        cout << "  ...OK" << endl;
         ////
 
         network.reset();
