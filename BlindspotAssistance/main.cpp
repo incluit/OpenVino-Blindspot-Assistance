@@ -434,7 +434,7 @@ int main(int argc, char *argv[])
         ////////////    MQTT Client Init  ////////////////
         string	address  = "tcp://localhost:1883";
         string  clientID = "async_publish";
-        cout << "Initializing for server '" << address << "'..." << endl;
+        std::cout << "Initializing for server '" << address << "'..." << endl;
 	    mqtt::async_client client(address, clientID);
 
         callback cb;
@@ -446,17 +446,17 @@ int main(int argc, char *argv[])
         conopts.set_will(will);
         mqtt::token_ptr conntok;
 
-        cout << "  ...OK" << endl;
+        std::cout << "  ...OK" << endl;
 
         try {
-            cout << "\nConnecting..." << endl;
+            std::cout << "\nConnecting..." << endl;
             conntok = client.connect(conopts);
-            cout << "Waiting for the connection..." << endl;
+            std::cout << "Waiting for the connection..." << endl;
             conntok->wait();
-            cout << "  ...OK" << endl;
+            std::cout << "  ...OK" << endl;
         }
         catch (const mqtt::exception& exc) {
-            cerr << exc.what() << endl;
+            std::cerr << exc.what() << endl;
         }
         /////////////////////////////
 
@@ -501,7 +501,7 @@ int main(int argc, char *argv[])
             ++fpsCounter;
             
             // Test msg
-            cout << "\nSending message..." << endl;
+            std::cout << "\nSending message..." << endl;
             mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, "test");
             pubmsg->set_qos(QOS);
             client.publish(pubmsg)->wait_for(TIMEOUT);
@@ -575,10 +575,10 @@ int main(int argc, char *argv[])
         }
 
         //// Disconnect MQTT
-        cout << "\nDisconnecting..." << endl;
+        std::cout << "\nDisconnecting..." << endl;
 		conntok = client.disconnect();
 		conntok->wait();
-		cout << "  ...OK" << endl;
+		std::cout << "  ...OK" << endl;
         ////
 
         network.reset();
