@@ -75,6 +75,7 @@ namespace
         std::cout << "    -i                           " << input_video << std::endl;
         std::cout << "    -loop_video                  " << loop_video_output_message << std::endl;
         std::cout << "    -u                           " << utilization_monitors_message << std::endl;
+        std::cout << "    -mqtt                        " << mqtt_message << std::endl;
     }
 
     bool ParseAndCheckCommandLine(int argc, char *argv[])
@@ -432,34 +433,34 @@ int main(int argc, char *argv[])
         output.start();
 
         ////////////    MQTT Client Init  ////////////////
-        string	address  = "tcp://localhost:1883";
-        string  clientID = "async_publish";
-        std::cout << "Initializing for server '" << address << "'..." << endl;
-	    mqtt::async_client client(address, clientID);
 
+        string address = "tcp://localhost:1883";
+        string clientID = "async_publish";
+        mqtt::async_client client(address, clientID);
+
+        std::cout << "Initializing for server '" << address << "'..." << std::endl;
         callback cb;
-     	client.set_callback(cb);
+        client.set_callback(cb);
 
         mqtt::connect_options conopts;
         mqtt::message willmsg(TOPIC, PAYLOAD, 1, true);
         mqtt::will_options will(willmsg);
         conopts.set_will(will);
+
         mqtt::token_ptr conntok;
 
-        std::cout << "  ...OK" << endl;
+        if (FLAGS_mqtt)
+        {
+            std::cout << "  ...OK" << std::endl;
 
-        try {
-            std::cout << "\nConnecting..." << endl;
+            std::cout << "\nConnecting..." << std::endl;
             conntok = client.connect(conopts);
-            std::cout << "Waiting for the connection..." << endl;
+            std::cout << "Waiting for the connection..." << std::endl;
             conntok->wait();
-            std::cout << "  ...OK" << endl;
-        }
-        catch (const mqtt::exception& exc) {
-            std::cerr << exc.what() << endl;
-        }
-        /////////////////////////////
+            std::cout << "  ...OK" << std::endl;
 
+            /////////////////////////////
+        }
 
         using timer = std::chrono::high_resolution_clock;
         using duration = std::chrono::duration<float, std::milli>;
@@ -499,12 +500,23 @@ int main(int argc, char *argv[])
                 }
             }
             ++fpsCounter;
-            
-            // Test msg
-            std::cout << "\nSending message..." << endl;
-            mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, "test");
-            pubmsg->set_qos(QOS);
-            client.publish(pubmsg)->wait_for(TIMEOUT);
+
+            if (FLAGS_mqtt)
+            {
+                // Test msg
+                try
+                {
+                    std::cout << "\nSending message..." << std::endl;
+                    mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, "test");
+                    pubmsg->set_qos(QOS);
+                    client.publish(pubmsg)->wait_for(TIMEOUT);
+                }
+                catch (const std::exception &error)
+                {
+                    std::cout << error.what() << std::endl;
+                    return 1;
+                }
+            }
 
             if (!output.isAlive())
             {
@@ -574,12 +586,15 @@ int main(int argc, char *argv[])
             }
         }
 
-        //// Disconnect MQTT
-        std::cout << "\nDisconnecting..." << endl;
-		conntok = client.disconnect();
-		conntok->wait();
-		std::cout << "  ...OK" << endl;
-        ////
+        if (FLAGS_mqtt)
+        {
+            //// Disconnect MQTT
+            std::cout << "\nDisconnecting..." << std::endl;
+            conntok = client.disconnect();
+            conntok->wait();
+            std::cout << "  ...OK" << std::endl;
+            ////
+        }
 
         network.reset();
 
