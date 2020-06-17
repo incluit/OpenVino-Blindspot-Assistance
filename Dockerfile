@@ -1,4 +1,4 @@
-FROM openvino/ubuntu18_dev:2020.2
+FROM openvino/ubuntu18_dev:2020.3
 
 ADD . /app
 WORKDIR /app
