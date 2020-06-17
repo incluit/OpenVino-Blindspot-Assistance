@@ -283,7 +283,7 @@ Options:
 
 ==== Other models
 
-You can also experiment by using different face detection models, being the ones available up to now:
+You can also experiment by using different detection models, being the ones available up to now:
 
 . person-vehicle-bike-detection-crossroad-0078
 . person-vehicle-bike-detection-crossroad-1016
