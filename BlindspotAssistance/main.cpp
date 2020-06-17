@@ -27,6 +27,7 @@
 #endif
 
 #include <opencv2/opencv.hpp>
+#include "drawer.hpp"
 
 #include <monitors/presenter.h>
 #include <samples/slog.hpp>
@@ -144,13 +145,62 @@ namespace
             }
             cv::Rect ri(static_cast<int>(f.rect.x * img.cols), static_cast<int>(f.rect.y * img.rows),
                         static_cast<int>(f.rect.width * img.cols), static_cast<int>(f.rect.height * img.rows));
-            cv::rectangle(img, ri, color, 2);
+            /* cv::rectangle(img, ri, color, 2);
+            std::cout << f.rect.x << std::endl;
+            std::cout << f.rect.width << std::endl;
+            std::cout << img.cols << std::endl;
+            std::cout << f.rect.y << std::endl;
+            std::cout << f.rect.height << std::endl;
+            std::cout << img.rows << std::endl;
+            cv::Point center;
+            center.x = (f.rect.x + f.rect.width / 2) * img.cols;
+            center.y = (f.rect.y + f.rect.height / 2) * img.rows;
+            cv::circle(img, static_cast<cv::Point>(center.x,center.y), 5, color, 2); // Central Point */
         }
     }
 
     const size_t DISP_WIDTH = 1280;
     const size_t DISP_HEIGHT = 720;
     const size_t MAX_INPUTS = 4;
+
+    bool firstTime = true;
+
+    void readArea()
+    {
+        // Read area points from CSV
+        std::ifstream pointsFile("../../../utils/points.ini");
+        std::string line;
+        int i = 0;
+        int points[MAX_INPUTS][4];
+        if (!pointsFile.is_open()) // Check if file is really open
+        {
+            std::cout << "Unable to upload init Area Configuration" << endl;
+        }
+        else
+        {
+            std::cout << "Reading Area Configuration" << endl;
+            while (getline(pointsFile, line))
+            {
+                std::stringstream sst(line);
+                sst >> points[i][0] >> points[i][1] >> points[i][2] >> points[i][3];
+                std::cout << "Cam Area " << i + 1 << ": " << points[i][0] << ',' << points[i][1] << ',' << points[i][2] << ',' << points[i][3] << endl;
+                i++;
+            }
+        }
+    }
+
+    void saveArea(cv::Rect2d roi)
+    {
+        // Code to save area points in CSV.
+    }
+
+    cv::Rect2d drawDetectionArea(cv::Mat windowImage, int i)
+    {
+        cv::Rect2d roiCam;
+        std::string windowName = "Select Detection Area. Cam: " + std::to_string(i + 1);
+        roiCam = cv::selectROI(windowName, windowImage, false);
+        return roiCam;
+    }
 
     struct DisplayParams
     {
@@ -238,6 +288,21 @@ namespace
         }
 #endif
         presenter.drawGraphs(windowImage);
+
+        if (FLAGS_show_calibration && firstTime)
+        {
+            std::cout << "Start detection area configuration" << std::endl;
+            cv::Rect2d roi[MAX_INPUTS];
+            std::cout << MAX_INPUTS << std::endl;
+            for (int i = 0; i < MAX_INPUTS; i++)
+            {
+                std::cout << i << std::endl;
+                roi[i] = drawDetectionArea(windowImage, i);
+            }
+            /* saveArea(roi); */
+            firstTime = false;
+        }
+
         drawStats();
         if (FLAGS_show_stats)
         {
@@ -246,6 +311,7 @@ namespace
             cv::putText(windowImage, str, cv::Point(15, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(0, 0, 0), 5);
             cv::putText(windowImage, str, cv::Point(15, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(255, 255, 255), 2);
         }
+
         cv::imshow(params.name, windowImage);
     }
 
@@ -266,38 +332,7 @@ int main(int argc, char *argv[])
             return 0;
         }
 
-        /*         std::ifstream pointsFile;
-        pointsFile.open("../../../utils/points.ini");
-        if (!pointsFile) {
-            std::cout << "Unable to upload init area configuration";
-            exit(1); 
-        }
-        float a;
-        while (pointsFile >> a) {
-            printf("%f ", a);
-        }
-        pointsFile.close(); */
-
-        // Read area points from CSV
-        std::ifstream pointsFile("../../../utils/points.ini");
-        std::string line;
-        int i = 0;
-        int points[4][4];
-        if (!pointsFile.is_open()) // Check if file is really open
-        {
-            std::cout << "Unable to upload init Area Configuration" << endl;
-        }
-        else
-        {
-            std::cout << "Reading Area Configuration" << endl;
-            while (getline(pointsFile, line))
-            {
-                std::stringstream sst(line);
-                sst >> points[i][0] >> points[i][1] >> points[i][2] >> points[i][3];
-                std::cout << "Cam Area " << i + 1 << ": " << points[i][0] << ',' << points[i][1] << ',' << points[i][2] << ',' << points[i][3] << endl;
-                i++;
-            }
-        }
+        readArea();
 
         std::string modelPath = FLAGS_m;
         std::size_t found = modelPath.find_last_of(".");
@@ -469,7 +504,7 @@ int main(int argc, char *argv[])
         ////////////    MQTT Client Init  ////////////////
         string address = "tcp://localhost:1883";
         string clientID = "async_publish";
-        cout << "Initializing for server '" << address << "'..." << endl;
+        std::cout << "Initializing for server '" << address << "'..." << endl;
         mqtt::async_client client(address, clientID);
 
         callback cb;
@@ -481,19 +516,19 @@ int main(int argc, char *argv[])
         conopts.set_will(will);
         mqtt::token_ptr conntok;
 
-        cout << "  ...OK" << endl;
+        std::cout << "  ...OK" << endl;
 
         try
         {
-            cout << "\nConnecting..." << endl;
+            std::cout << "\nConnecting..." << endl;
             conntok = client.connect(conopts);
-            cout << "Waiting for the connection..." << endl;
+            std::cout << "Waiting for the connection..." << endl;
             conntok->wait();
-            cout << "  ...OK" << endl;
+            std::cout << "  ...OK" << endl;
         }
         catch (const mqtt::exception &exc)
         {
-            cerr << exc.what() << endl;
+            std::cerr << exc.what() << endl;
         }
         /////////////////////////////
 
@@ -537,7 +572,7 @@ int main(int argc, char *argv[])
             ++fpsCounter;
 
             // Test msg
-            cout << "\nSending message..." << endl;
+            // std::cout << "\nSending message..." << endl;
             mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, "test");
             pubmsg->set_qos(QOS);
             client.publish(pubmsg)->wait_for(TIMEOUT);
@@ -611,10 +646,10 @@ int main(int argc, char *argv[])
         }
 
         //// Disconnect MQTT
-        cout << "\nDisconnecting..." << endl;
+        std::cout << "\nDisconnecting..." << endl;
         conntok = client.disconnect();
         conntok->wait();
-        cout << "  ...OK" << endl;
+        std::cout << "  ...OK" << endl;
         ////
 
         network.reset();
