@@ -37,11 +37,11 @@ endif()
 find_package(ngraph)
 
 file (GLOB MAIN_SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
         )
 
 file (GLOB MAIN_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp
         )
 
 # Create named folders for the sources within the .vcproj
@@ -70,7 +70,7 @@ if(MULTICHANNEL_DEMO_USE_TBB)
     endif()
 endif()
 
-add_subdirectory(common)
+add_subdirectory(src/common)
 target_link_libraries(${TARGET_NAME} ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} ngraph::ngraph common)
 target_link_libraries(${TARGET_NAME} paho-mqttpp3 paho-mqtt3as)
 
