@@ -438,7 +438,6 @@ int main(int argc, char *argv[])
         string clientID = "async_publish";
         mqtt::async_client client(address, clientID);
 
-        std::cout << "Initializing for server '" << address << "'..." << std::endl;
         callback cb;
         client.set_callback(cb);
 
@@ -451,13 +450,13 @@ int main(int argc, char *argv[])
 
         if (FLAGS_mqtt)
         {
-            std::cout << "  ...OK" << std::endl;
+            slog::info << "Initializing for server '" << address << "'..." << slog::endl;
 
-            std::cout << "\nConnecting..." << std::endl;
+            slog::info << "\nConnecting..." << slog::endl;
             conntok = client.connect(conopts);
-            std::cout << "Waiting for the connection..." << std::endl;
+            slog::info << "Waiting for the connection..." << slog::endl;
             conntok->wait();
-            std::cout << "  ...OK" << std::endl;
+            slog::info << "  ...OK" << slog::endl;
 
             /////////////////////////////
         }
@@ -504,18 +503,10 @@ int main(int argc, char *argv[])
             if (FLAGS_mqtt)
             {
                 // Test msg
-                try
-                {
-                    std::cout << "\nSending message..." << std::endl;
-                    mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, "test");
-                    pubmsg->set_qos(QOS);
-                    client.publish(pubmsg)->wait_for(TIMEOUT);
-                }
-                catch (const std::exception &error)
-                {
-                    std::cout << error.what() << std::endl;
-                    return 1;
-                }
+                slog::info << "\nSending message..." << slog::endl;
+                mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, "test");
+                pubmsg->set_qos(QOS);
+                client.publish(pubmsg)->wait_for(TIMEOUT);
             }
 
             if (!output.isAlive())
@@ -589,10 +580,10 @@ int main(int argc, char *argv[])
         if (FLAGS_mqtt)
         {
             //// Disconnect MQTT
-            std::cout << "\nDisconnecting..." << std::endl;
+            slog::info << "\nDisconnecting..." << slog::endl;
             conntok = client.disconnect();
             conntok->wait();
-            std::cout << "  ...OK" << std::endl;
+            slog::info << "  ...OK" << slog::endl;
             ////
         }
 
