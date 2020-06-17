@@ -13,8 +13,8 @@ before_script:
 
 script:
   - docker run --name blindspotcont -t -d --volume="$HOME/.Xauthority:/root/.Xauthority:rw" blindspot-incluit
-  - docker exec blindspotcont bash -c 'source ${INTEL_OPENVINO_DIR}/bin/setupvars.sh && cd /app/BlindspotAssistance/build && curl -s -L https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip -o buildwrapper.zip && unzip -qq buildwrapper.zip && export PATH=$PATH:build-wrapper-linux-x86/ && build-wrapper-linux-x86-64 --out-dir bw-output make clean all'
-  - docker exec blindspotcont bash -c 'cd /app/BlindspotAssistance/build && curl -s -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip -o sonarscanner.zip && unzip -qq sonarscanner.zip && export PATH=$PATH:sonar-scanner-4.2.0.1873-linux/bin/ && apt-get install -y openjdk-8-jre && sonar-scanner -Dsonar.organization=incluit -Dsonar.projectKey=incluit_OpenVino-Blindspot-Assistance -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectBaseDir=../ -Dproject.home=../ -Dsonar.cfamily.build-wrapper-output=bw-output -Dsonar.login=166e8c3490138565f7b424de56b7dd6abe97beec'
+  #- docker exec blindspotcont bash -c 'source ${INTEL_OPENVINO_DIR}/bin/setupvars.sh && cd /app/BlindspotAssistance/build && curl -s -L https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip -o buildwrapper.zip && unzip -qq buildwrapper.zip && export PATH=$PATH:build-wrapper-linux-x86/ && build-wrapper-linux-x86-64 --out-dir bw-output make clean all'
+  #- docker exec blindspotcont bash -c 'cd /app/BlindspotAssistance/build && curl -s -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip -o sonarscanner.zip && unzip -qq sonarscanner.zip && export PATH=$PATH:sonar-scanner-4.2.0.1873-linux/bin/ && apt-get install -y openjdk-8-jre && sonar-scanner -Dsonar.organization=incluit -Dsonar.projectKey=incluit_OpenVino-Blindspot-Assistance -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectBaseDir=../ -Dproject.home=../ -Dsonar.cfamily.build-wrapper-output=bw-output -Dsonar.login=166e8c3490138565f7b424de56b7dd6abe97beec'
 
 after_script:
   - docker images
