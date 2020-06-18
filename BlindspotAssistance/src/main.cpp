@@ -77,11 +77,8 @@ namespace
         std::cout << "    -i                           " << input_video << std::endl;
         std::cout << "    -loop_video                  " << loop_video_output_message << std::endl;
         std::cout << "    -u                           " << utilization_monitors_message << std::endl;
-<<<<<<< HEAD:BlindspotAssistance/main.cpp
         std::cout << "    -show_calibration            " << show_calibration_message << std::endl;
-=======
         std::cout << "    -mqtt                        " << mqtt_message << std::endl;
->>>>>>> master:BlindspotAssistance/src/main.cpp
     }
 
     bool ParseAndCheckCommandLine(int argc, char *argv[])
@@ -130,6 +127,13 @@ namespace
         Detection(cv::Rect2f r, int l, float c) : rect(r), label(l), confidence(c) {}
     };
 
+    const size_t DISP_WIDTH = 1280;
+    const size_t DISP_HEIGHT = 720;
+    const size_t MAX_INPUTS = 4;
+    bool firstTime = true;
+    cv::Rect2d roi[MAX_INPUTS];
+    int camDetections[MAX_INPUTS];
+
     void drawDetections(cv::Mat &img, const std::vector<Detection> &detections)
     {
         cv::Scalar color;
@@ -149,25 +153,35 @@ namespace
             }
             cv::Rect ri(static_cast<int>(f.rect.x * img.cols), static_cast<int>(f.rect.y * img.rows),
                         static_cast<int>(f.rect.width * img.cols), static_cast<int>(f.rect.height * img.rows));
-            /* cv::rectangle(img, ri, color, 2);
-            std::cout << f.rect.x << std::endl;
-            std::cout << f.rect.width << std::endl;
-            std::cout << img.cols << std::endl;
-            std::cout << f.rect.y << std::endl;
-            std::cout << f.rect.height << std::endl;
-            std::cout << img.rows << std::endl;
-            cv::Point center;
-            center.x = (f.rect.x + f.rect.width / 2) * img.cols;
-            center.y = (f.rect.y + f.rect.height / 2) * img.rows;
-            cv::circle(img, static_cast<cv::Point>(center.x,center.y), 5, color, 2); // Central Point */
+            cv::rectangle(img, ri, color, 2);
         }
     }
 
-    const size_t DISP_WIDTH = 1280;
-    const size_t DISP_HEIGHT = 720;
-    const size_t MAX_INPUTS = 4;
+    int areaDetectionCount(cv::Mat &img, const std::vector<Detection> &detections, cv::Rect2d roi, cv::Point params)
+    {
+        int count = 0;
 
-    bool firstTime = true;
+        // Adjusting the detection area
+        roi.x -= params.x;
+        roi.y -= params.y;
+
+        for (const Detection &f : detections)
+        {
+            // Central Points of the Detections
+            float x = (f.rect.x + f.rect.width / 2) * img.cols;
+            float y = (f.rect.y + f.rect.height / 2) * img.rows;
+
+            // Check if point is inside a ROI
+            if (x > roi.x && x < roi.x + roi.height)
+            {
+                if (y > roi.y && y < roi.y + roi.height)
+                {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }
 
     void readArea()
     {
@@ -203,6 +217,7 @@ namespace
         cv::Rect2d roiCam;
         std::string windowName = "Select Detection Area. Cam: " + std::to_string(i + 1);
         roiCam = cv::selectROI(windowName, windowImage, false);
+        cv::destroyWindow(windowName);
         return roiCam;
     }
 
@@ -254,6 +269,7 @@ namespace
                 {
                     drawDetections(windowPart, elem->detections.get<std::vector<Detection>>());
                 }
+                camDetections[i] = areaDetectionCount(windowPart, elem->detections.get<std::vector<Detection>>(), roi[i], params.points[i]);
             }
         };
 
@@ -266,13 +282,13 @@ namespace
                 while (true)
                 {
                     auto newPos = stats.find('\n', currPos);
-                    cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(0, 0, 0), 2);
-                    cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(255, 255, 255), 1);
+                    cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(0, 0, 0), 2);
+                    cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
                     if (newPos == std::string::npos)
                     {
                         break;
                     }
-                    pos += cv::Point(0, 25);
+                    pos += cv::Point(0, 20);
                     currPos = newPos + 1;
                 }
             }
@@ -296,11 +312,9 @@ namespace
         if (FLAGS_show_calibration && firstTime)
         {
             std::cout << "Start detection area configuration" << std::endl;
-            cv::Rect2d roi[MAX_INPUTS];
-            std::cout << MAX_INPUTS << std::endl;
             for (int i = 0; i < MAX_INPUTS; i++)
             {
-                std::cout << i << std::endl;
+                std::cout << "Select Detection Area. Cam: " << std::to_string(i + 1) << std::endl;
                 roi[i] = drawDetectionArea(windowImage, i);
             }
             /* saveArea(roi); */
@@ -308,12 +322,13 @@ namespace
         }
 
         drawStats();
+
         if (FLAGS_show_stats)
         {
             char str[256];
             snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f / time));
-            cv::putText(windowImage, str, cv::Point(15, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(0, 0, 0), 5);
-            cv::putText(windowImage, str, cv::Point(15, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.8, cv::Scalar(255, 255, 255), 2);
+            cv::putText(windowImage, str, cv::Point(15, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.6, cv::Scalar(0, 0, 0), 5);
+            cv::putText(windowImage, str, cv::Point(15, 30), cv::HersheyFonts::FONT_HERSHEY_DUPLEX, 0.6, cv::Scalar(255, 255, 255), 2);
         }
 
         cv::imshow(params.name, windowImage);
@@ -528,7 +543,15 @@ int main(int argc, char *argv[])
             slog::info << "\nConnecting..." << slog::endl;
             conntok = client.connect(conopts);
             slog::info << "Waiting for the connection..." << slog::endl;
-            conntok->wait();
+            try
+            {
+                conntok->wait();
+            }
+            catch (...)
+            {
+                slog::info << "MQTT broker: Error connection." << slog::endl;
+            }
+
             slog::info << "  ...OK" << slog::endl;
 
             /////////////////////////////
@@ -641,6 +664,10 @@ int main(int argc, char *argv[])
 
                     statStream << "Render time: " << outputStat.renderTime
                                << "ms" << std::endl;
+                    
+                    for (int i = 0; i < MAX_INPUTS; i++) {
+                        statStream << "Cam "<< to_string(i + 1) << ": "<< std::to_string(camDetections[i]) << std::endl;
+                    }
 
                     if (FLAGS_no_show)
                     {
