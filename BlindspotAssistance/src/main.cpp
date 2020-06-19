@@ -212,13 +212,18 @@ namespace
         // Code to save area points in CSV.
     }
 
-    cv::Rect2d drawDetectionArea(cv::Mat windowImage, int i)
+    cv::Rect2d areaDetection(cv::Mat windowImage, int i)
     {
         cv::Rect2d roiCam;
         std::string windowName = "Select Detection Area. Cam: " + std::to_string(i + 1);
         roiCam = cv::selectROI(windowName, windowImage, false);
         cv::destroyWindow(windowName);
         return roiCam;
+    }
+
+    void drawAreaDetection(cv::Mat &img, cv::Rect2d roi)
+    {
+        cv::rectangle(img, roi, cv::Scalar(0, 0, 0), 1);
     }
 
     struct DisplayParams
@@ -308,17 +313,24 @@ namespace
         }
 #endif
         presenter.drawGraphs(windowImage);
-
+        
+        // Select Area Detection
         if (FLAGS_show_calibration && firstTime)
         {
-            std::cout << "Start detection area configuration" << std::endl;
+            std::cout << "Start area detection configuration" << std::endl;
             for (int i = 0; i < MAX_INPUTS; i++)
             {
-                std::cout << "Select Detection Area. Cam: " << std::to_string(i + 1) << std::endl;
-                roi[i] = drawDetectionArea(windowImage, i);
+                std::cout << "Selec Area Detection. Cam: " << std::to_string(i + 1) << std::endl;
+                roi[i] = areaDetection(windowImage, i);
             }
             /* saveArea(roi); */
             firstTime = false;
+        }
+
+        // Draw Area Detection
+        for (int i = 0; i < MAX_INPUTS; i++)
+        {
+            drawAreaDetection(windowImage, roi[i]);
         }
 
         drawStats();
@@ -664,9 +676,10 @@ int main(int argc, char *argv[])
 
                     statStream << "Render time: " << outputStat.renderTime
                                << "ms" << std::endl;
-                    
-                    for (int i = 0; i < MAX_INPUTS; i++) {
-                        statStream << "Cam "<< to_string(i + 1) << ": "<< std::to_string(camDetections[i]) << std::endl;
+
+                    for (int i = 0; i < MAX_INPUTS; i++)
+                    {
+                        statStream << "Cam " << to_string(i + 1) << ": " << std::to_string(camDetections[i]) << std::endl;
                     }
 
                     if (FLAGS_no_show)
