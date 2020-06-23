@@ -189,7 +189,7 @@ You can pull the blindspot assistance Docker image using:
 docker pull openvinoincluit/blindspot-openvino
 ----
 
-=== MQTT Broker Instalation
+=== MQTT Broker Installation
 
 We are using Mosquitto MQTT broker to handle all the messages from blindspot assistance.
 
@@ -213,28 +213,28 @@ Run the application with the `-h` option to see the usage message:
 Options:
 [source,bash]
 ----
-    -h                           Print a usage message
+    -h                           Print a usage message.
     -m "<path>"                  Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations
+      -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
           Or
-      -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernel descriptions
+      -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernel descriptions.
     -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
-    -nc                          Optional. Maximum number of processed camera inputs (web cameras)
-    -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
-    -nireq                       Optional. Number of infer requests
-    -n_iqs                       Optional. Frame queue size for input channels
-    -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
-    -n_sp                        Optional. Number of sampling periods
-    -pc                          Optional. Enable per-layer performance report
-    -t                           Optional. Probability threshold for detections
-    -no_show                     Optional. Do not show processed video
+    -nc                          Optional. Maximum number of processed camera inputs (web cameras).
+    -bs                          Optional. Batch size for processing (the number of frames processed per infer request).
+    -nireq                       Optional. Number of infer requests.
+    -n_iqs                       Optional. Frame queue size for input channels.
+    -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec.
+    -n_sp                        Optional. Number of sampling periods.
+    -pc                          Optional. Enable per-layer performance report.
+    -t                           Optional. Probability threshold for detections.
+    -no_show                     Optional. Do not show processed video.
     -no_show_d                   Optional. Optional. Do not show detected objects.
-    -show_stats                  Optional. Enable statistics report
-    -duplicate_num               Optional. Enable and specify the number of channels additionally copied from real sources
-    -real_input_fps              Optional. Disable input frames caching for maximum throughput pipeline
-    -i                           Optional. Specify full path to input video files
+    -show_stats                  Optional. Enable statistics report.
+    -duplicate_num               Optional. Enable and specify the number of channels additionally copied from real sources.
+    -real_input_fps              Optional. Disable input frames caching for maximum throughput pipeline.
+    -i                           Optional. Specify full path to input video files.
     -loop_video                  Optional. Enable playing video on a loop.
-    -u                           Optional. List of monitors to show initially.
+    -mqtt                        Optional. MQTT broker to handle all the messages.
 ----
 
 ==== Examples
@@ -246,35 +246,42 @@ Options:
 ./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4
 ----
 
-**2.** Using 3 video files and 1 camera (`-nc 1`):
+**2.** Using MQTT Broker:
+
+[source,bash]
+----
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -mqtt
+----
+
+**3.** Using 3 video files and 1 camera (`-nc 1`):
 
 [source,bash]
 ----
 ./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 -nc 1
 ----
 
-**3.** Using 4 video files, showing statistics report (`-show_stats`):
+**4.** Using 4 video files, showing statistics report (`-show_stats`):
 
 [source,bash]
 ----
 ./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -show_stats
 ----
 
-**4.** Using 4 video files, without video output (`-no_show`). Average performance is displayed on the console.
+**5.** Using 4 video files, without video output (`-no_show`). Average performance is displayed on the console.
 
 [source,bash]
 ----
 ./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -no_show
 ----
 
-**5.** Using 4 video files, without detected objects (`-no_show_d`). 
+**6.** Using 4 video files, without detected objects (`-no_show_d`). 
 
 [source,bash]
 ----
 ./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -no_show_d
 ----
 
-**5.** Using 4 video files, changing the probability threshold for detections (`-t 0.1`). 
+**7.** Using 4 video files, changing the probability threshold for detections (`-t 0.1`). 
 
 [source,bash]
 ----
