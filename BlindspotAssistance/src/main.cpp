@@ -157,19 +157,15 @@ namespace
         }
     }
 
-    int areaDetectionCount(cv::Mat &img, const std::vector<Detection> &detections, cv::Rect2d roi, cv::Point params)
+    int areaDetectionCount(cv::Mat &img, const std::vector<Detection> &detections, cv::Rect2d roi)
     {
         int count = 0;
-
-        // Adjusting the detection area
-        roi.x -= params.x;
-        roi.y -= params.y;
 
         for (const Detection &f : detections)
         {
             // Central Points of the Detections
-            float x = (f.rect.x + f.rect.width / 2) * img.cols;
-            float y = (f.rect.y + f.rect.height / 2) * img.rows;
+            float x = (f.rect.x + f.rect.width / 2) * (float)(img.cols);
+            float y = (f.rect.y + f.rect.height / 2) * (float)(img.rows);
 
             // Check if point is inside a ROI
             if (x > roi.x && x < roi.x + roi.height)
@@ -212,17 +208,20 @@ namespace
         // Code to save area points in CSV.
     }
 
-    cv::Rect2d areaDetection(cv::Mat windowImage, int i)
+    cv::Rect2d areaDetection(cv::Mat windowImage, int i, cv::Point params, cv::Size frameSize)
     {
         cv::Rect2d roiCam;
+        cv::Rect crop(params.x, params.y, frameSize.width, frameSize.height);
         std::string windowName = "Select Detection Area. Cam: " + std::to_string(i + 1);
-        roiCam = cv::selectROI(windowName, windowImage, false);
+        roiCam = cv::selectROI(windowName, windowImage(crop), false);
         cv::destroyWindow(windowName);
         return roiCam;
     }
 
-    void drawAreaDetection(cv::Mat &img, cv::Rect2d roi)
+    void drawAreaDetection(cv::Mat &img, cv::Rect2d roi, cv::Point params)
     {
+        roi.x += params.x;
+        roi.y += params.y;
         cv::rectangle(img, roi, cv::Scalar(0, 0, 0), 1);
     }
 
@@ -274,7 +273,7 @@ namespace
                 {
                     drawDetections(windowPart, elem->detections.get<std::vector<Detection>>());
                 }
-                camDetections[i] = areaDetectionCount(windowPart, elem->detections.get<std::vector<Detection>>(), roi[i], params.points[i]);
+                camDetections[i] = areaDetectionCount(windowPart, elem->detections.get<std::vector<Detection>>(), roi[i]);
             }
         };
 
@@ -321,7 +320,7 @@ namespace
             for (int i = 0; i < MAX_INPUTS; i++)
             {
                 std::cout << "Selec Area Detection. Cam: " << std::to_string(i + 1) << std::endl;
-                roi[i] = areaDetection(windowImage, i);
+                roi[i] = areaDetection(windowImage, i, params.points[i], params.frameSize);
             }
             /* saveArea(roi); */
             firstTime = false;
@@ -330,7 +329,7 @@ namespace
         // Draw Area Detection
         for (int i = 0; i < MAX_INPUTS; i++)
         {
-            drawAreaDetection(windowImage, roi[i]);
+            drawAreaDetection(windowImage, roi[i], params.points[i]);
         }
 
         drawStats();
