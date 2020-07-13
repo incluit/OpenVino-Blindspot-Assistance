@@ -77,6 +77,7 @@ namespace
         std::cout << "    -i                           " << input_video << std::endl;
         std::cout << "    -loop_video                  " << loop_video_output_message << std::endl;
         std::cout << "    -u                           " << utilization_monitors_message << std::endl;
+        std::cout << "    -calibration                 " << calibration_message << std::endl;
         std::cout << "    -show_calibration            " << show_calibration_message << std::endl;
         std::cout << "    -mqtt                        " << mqtt_message << std::endl;
     }
@@ -312,9 +313,9 @@ namespace
         }
 #endif
         presenter.drawGraphs(windowImage);
-        
+
         // Select Area Detection
-        if (FLAGS_show_calibration && firstTime)
+        if (FLAGS_calibration && firstTime)
         {
             std::cout << "Start area detection configuration" << std::endl;
             for (int i = 0; i < MAX_INPUTS; i++)
@@ -327,9 +328,12 @@ namespace
         }
 
         // Draw Area Detection
-        for (int i = 0; i < MAX_INPUTS; i++)
+        if (FLAGS_show_calibration)
         {
-            drawAreaDetection(windowImage, roi[i], params.points[i]);
+            for (int i = 0; i < MAX_INPUTS; i++)
+            {
+                drawAreaDetection(windowImage, roi[i], params.points[i]);
+            }
         }
 
         drawStats();
@@ -675,10 +679,12 @@ int main(int argc, char *argv[])
 
                     statStream << "Render time: " << outputStat.renderTime
                                << "ms" << std::endl;
-
-                    for (int i = 0; i < MAX_INPUTS; i++)
+                    if (FLAGS_show_calibration)
                     {
-                        statStream << "Cam " << to_string(i + 1) << ": " << std::to_string(camDetections[i]) << std::endl;
+                        for (int i = 0; i < MAX_INPUTS; i++)
+                        {
+                            statStream << "Cam " << to_string(i + 1) << ": " << std::to_string(camDetections[i]) << std::endl;
+                        }
                     }
 
                     if (FLAGS_no_show)
