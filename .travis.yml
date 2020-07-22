@@ -9,6 +9,7 @@ jobs:
   include:
 
     - stage: Docker
+      if: branch = master
       script:
         - sudo apt-get update
         - docker build -t blindspot-incluit .
@@ -18,14 +19,9 @@ jobs:
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         - docker tag blindspot-incluit  openvinoincluit/blindspot-openvino:latest
         - docker push openvinoincluit/blindspot-openvino:latest
-      branches:
-        only:
-          - master
 
     - stage: Validation
+      if: branch = master
       script:
         - docker pull openvinoincluit/blindspot-openvino:latest
         - docker images --digests
-      branches:
-        only:
-          - master
