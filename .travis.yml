@@ -17,6 +17,7 @@ jobs:
         - docker exec blindspotcont bash -c 'cd /app/BlindspotAssistance/build && curl -s -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip -o sonarscanner.zip && unzip -qq sonarscanner.zip && export PATH=$PATH:sonar-scanner-4.2.0.1873-linux/bin/ && apt-get install -y openjdk-8-jre && sonar-scanner -Dsonar.organization=incluit -Dsonar.projectKey=incluit_OpenVino-Blindspot-Assistance -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectBaseDir=../src -Dproject.home=../src -Dsonar.cfamily.build-wrapper-output=bw-output -Dsonar.login=166e8c3490138565f7b424de56b7dd6abe97beec'
         - docker ps
         - docker images
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         - docker tag blindspot-incluit  openvinoincluit/blindspot-openvino:latest
         - docker push openvinoincluit/blindspot-openvino:latest
 
