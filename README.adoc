@@ -109,6 +109,13 @@ cd OpenVino-Blindspot-Assistance
 bash scripts/download_models.sh
 ----
 
+**4.** Add openvino module
+
+[source,bash]
+----
+export PYTHONPATH=/opt/intel/openvino/python/python3.6:/opt/intel/openvino/python/python3:$PYTHONPATH
+----
+
 == Usage
 
 === Run
