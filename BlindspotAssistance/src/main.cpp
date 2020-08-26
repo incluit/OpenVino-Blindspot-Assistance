@@ -578,8 +578,6 @@ int main(int argc, char *argv[])
 
             if (FLAGS_alerts)
             {
-                // Test msg
-                slog::info << "\nSending message..." << slog::endl;
                 alertPublisher.sendAlert("test");
             }
 

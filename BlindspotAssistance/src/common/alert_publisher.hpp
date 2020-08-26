@@ -31,8 +31,6 @@ class AlertPublisher {
     }
 
     void sendAlert(const char* payload){
-        std::cout << "Microservice " << microservice << " sending alert..." << std::endl;
-
         time_t now = time(0);
         tm *ltm = localtime(&now);
 
@@ -46,8 +44,7 @@ class AlertPublisher {
         int message_size = microservice_size + date_size + time_size + payload_size + spaces;
         zmq::message_t message(message_size);
         snprintf ((char *) message.data(), message_size, "%s %s %s %s", microservice, date, time, payload);
-        std::cout << "Current Message: " << message << std::endl;
-        //publisher.send(message, ZMQ_DONTWAIT);
+        std::cout << "Microservice " << microservice << " sending alert: " << message << std::endl;
         publisher.send(message, ZMQ_DONTWAIT);
     }
 };
