@@ -40,8 +40,7 @@
 #include "threading.hpp"
 #include "graph.hpp"
 
-#include "mqtt.hpp"
-#include "mqtt/async_client.h"
+#include "alert_publisher.hpp"
 
 namespace
 {
@@ -79,7 +78,7 @@ namespace
         std::cout << "    -u                           " << utilization_monitors_message << std::endl;
         std::cout << "    -calibration                 " << calibration_message << std::endl;
         std::cout << "    -show_calibration            " << show_calibration_message << std::endl;
-        std::cout << "    -mqtt                        " << mqtt_message << std::endl;
+        std::cout << "    -alerts                      " << alerts_message << std::endl;
     }
 
     bool ParseAndCheckCommandLine(int argc, char *argv[])
@@ -189,16 +188,16 @@ namespace
         int points[MAX_INPUTS][4];
         if (!pointsFile.is_open()) // Check if file is really open
         {
-            std::cout << "Unable to upload init Area Configuration" << endl;
+            std::cout << "Unable to upload init Area Configuration" << std::endl;
         }
         else
         {
-            std::cout << "Reading Area Configuration" << endl;
+            std::cout << "Reading Area Configuration" << std::endl;
             while (getline(pointsFile, line))
             {
                 std::stringstream sst(line);
                 sst >> points[i][0] >> points[i][1] >> points[i][2] >> points[i][3];
-                std::cout << "Cam Area " << i + 1 << ": " << points[i][0] << ',' << points[i][1] << ',' << points[i][2] << ',' << points[i][3] << endl;
+                std::cout << "Cam Area " << i + 1 << ": " << points[i][0] << ',' << points[i][1] << ',' << points[i][2] << ',' << points[i][3] << std::endl;
                 i++;
             }
         }
@@ -535,42 +534,8 @@ int main(int argc, char *argv[])
 
         output.start();
 
-        ////////////    MQTT Client Init  ////////////////
-
-        string address = "tcp://localhost:1883";
-        string clientID = "async_publish";
-        mqtt::async_client client(address, clientID);
-
-        callback cb;
-        client.set_callback(cb);
-
-        mqtt::connect_options conopts;
-        mqtt::message willmsg(TOPIC, PAYLOAD, 1, true);
-        mqtt::will_options will(willmsg);
-        conopts.set_will(will);
-
-        mqtt::token_ptr conntok;
-
-        if (FLAGS_mqtt)
-        {
-            slog::info << "Initializing for server '" << address << "'..." << slog::endl;
-
-            slog::info << "\nConnecting..." << slog::endl;
-            conntok = client.connect(conopts);
-            slog::info << "Waiting for the connection..." << slog::endl;
-            try
-            {
-                conntok->wait();
-            }
-            catch (...)
-            {
-                slog::info << "MQTT broker: Error connection." << slog::endl;
-            }
-
-            slog::info << "  ...OK" << slog::endl;
-
-            /////////////////////////////
-        }
+        ////////////    Messenger Init  ////////////////
+        AlertPublisher alertPublisher = AlertPublisher("BS");
 
         using timer = std::chrono::high_resolution_clock;
         using duration = std::chrono::duration<float, std::milli>;
@@ -611,13 +576,11 @@ int main(int argc, char *argv[])
             }
             ++fpsCounter;
 
-            if (FLAGS_mqtt)
+            if (FLAGS_alerts)
             {
                 // Test msg
                 slog::info << "\nSending message..." << slog::endl;
-                mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, "test");
-                pubmsg->set_qos(QOS);
-                client.publish(pubmsg)->wait_for(TIMEOUT);
+                alertPublisher.sendAlert("test");
             }
 
             if (!output.isAlive())
@@ -683,7 +646,7 @@ int main(int argc, char *argv[])
                     {
                         for (int i = 0; i < MAX_INPUTS; i++)
                         {
-                            statStream << "Cam " << to_string(i + 1) << ": " << std::to_string(camDetections[i]) << std::endl;
+                            statStream << "Cam " << std::to_string(i + 1) << ": " << std::to_string(camDetections[i]) << std::endl;
                         }
                     }
 
@@ -693,16 +656,6 @@ int main(int argc, char *argv[])
                     }
                 }
             }
-        }
-
-        if (FLAGS_mqtt)
-        {
-            //// Disconnect MQTT
-            slog::info << "\nDisconnecting..." << slog::endl;
-            conntok = client.disconnect();
-            conntok->wait();
-            slog::info << "  ...OK" << slog::endl;
-            ////
         }
 
         network.reset();
