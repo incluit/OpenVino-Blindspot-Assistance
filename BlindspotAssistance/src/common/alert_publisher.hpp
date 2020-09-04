@@ -25,7 +25,7 @@ class AlertPublisher {
         strcpy( microservice, ms );
         // Prepare our context and publisher
         publisher = zmq::socket_t(context, ZMQ_PUB);
-        publisher.connect("tcp://localhost:4444");
+        publisher.connect("tcp://localhost:3333");
         // Initialize random number generator
         srandom ((unsigned) time (NULL));
     }
