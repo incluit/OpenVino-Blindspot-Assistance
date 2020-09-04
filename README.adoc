@@ -143,7 +143,7 @@ cd intel64/Release
 
 === Build with Docker
 
-==== Prerequisites
+==== Install Docker
 
 * Docker. To install on Ubuntu, run:
 
@@ -156,7 +156,7 @@ sudo groupadd docker
 sudo usermod -aG docker $USER
 ----
 
-==== Installation
+==== Build in the docker
 
 **1.** Clone the repository at desired location:
 
@@ -172,7 +172,7 @@ git clone https://github.com/incluit/OpenVino-Blindspot-Assistance.git
 cd OpenVino-Blindspot-Assistance
 ----
 
-**3.** Build the docker:
+**3.** Build the docker and blindspot:
 [source,bash]
 ----
 make docker-build
@@ -187,16 +187,6 @@ You can pull the blindspot assistance Docker image using:
 
 ----
 docker pull openvinoincluit/blindspot-openvino
-----
-
-=== MQTT Broker Installation
-
-We are using Mosquitto MQTT broker to handle all the messages from blindspot assistance.
-
-To run Mosquitto broker in the base system use:
-
-----
-docker run -d --rm --name broker -p 1883:1883 eclipse-mosquitto
 ----
 
 == Usage
@@ -236,7 +226,7 @@ Options:
     -loop_video                  Optional. Enable playing video on a loop.
     -calibration                 Optional. Camera calibration.
     -show_calibration            Optional. Show camera calibration.
-    -mqtt                        Optional. MQTT broker to handle all the messages.
+    -alerts                      Optional. Send alerts to AlertManager through the proxy.
 ----
 
 ==== Examples
@@ -308,8 +298,8 @@ You can also experiment by using different detection models, being the ones avai
 ----
 
 ==== Run in Docker
-**1.** Run the docker:
 
+**1.** Run the docker:
 [source,bash]
 ----
 make docker-run
@@ -346,4 +336,4 @@ Enter the Docker container and run it again.
 
 == [Optional] AWS (In Progress)
 
-We also plan to send the data through MQTT using AWS IoT-Core. Using AWS may incur in a cost, so this will also be optional for you to run with/without it.
+We also plan to send the data through ZMQ using AWS IoT-Core. Using AWS may incur in a cost, so this will also be optional for you to run with/without it.
