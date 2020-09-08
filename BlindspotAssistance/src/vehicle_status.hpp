@@ -1,6 +1,38 @@
 #include <iostream>
 #include <string>
-#include <../classes.hpp>
+#include <memory>
+#include "classes.hpp"
+#include <boost/circular_buffer.hpp>
+#include "std_msgs/msg/string.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "ets_msgs/msg/truck.hpp"
+
+
+// #ifdef SIMULATOR
+void Truck::ros_callback(const ets_msgs::msg::Truck::SharedPtr msg)
+{
+    this->setSpeed(msg->speed);
+    this->setAcc(msg->acc_x, msg->acc_y, msg->acc_z);
+    this->setRpm(msg->rpm);
+    this->setGear(msg->gear);
+    this->setEngine(msg->engine_running);
+    this->setTrailer(msg->trailer_connected);
+    this->setPosition(msg->x, msg->y, msg->z, msg->heading, msg->pitch, msg->roll);
+    this->setParkingBrake(msg->parking_brake);
+}
+// #endif
+
+Truck truck;
+void ros_client(Truck *truck)
+{
+	auto node = rclcpp::Node::make_shared("ets_client");
+
+	auto sub = node->create_subscription<ets_msgs::msg::Truck>(
+		"truck", std::bind(&Truck::ros_callback, truck, std::placeholders::_1), rmw_qos_profile_default);
+
+	rclcpp::spin(node);
+}
+
 
 enum class Modes {
     unknown,
@@ -17,6 +49,10 @@ class vehicle_status
         Modes mode = Modes::surveillance;
         bool engine_on, trailer_on, cruise_control_on;
     public:
+        vehicle_status(int argc, char *argv[]){
+            rclcpp::init(argc, argv);
+        	std::thread truck_data(ros_client, &truck);
+        }
         Modes get_mode(){ return mode; }
         bool isEngineON(){ return engine_on; }
         bool isTrailerON(){ return trailer_on; }

@@ -41,7 +41,7 @@
 #include "graph.hpp"
 
 #include "alert_publisher.hpp"
-#include "./common/vehicle_status.hpp"
+#include "vehicle_status.hpp"
 
 namespace
 {

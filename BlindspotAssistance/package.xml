@@ -4,7 +4,7 @@
   <name>blindspot-assistance</name>
   <version>0.1.0</version>
   <description>
-    ETS2/ATS sample client
+    ETS2 client
   </description>
   <maintainer email="mauricio.aguilar@incluit.com">Mauricio Aguilar</maintainer>
   <maintainer email="luciano.fernandez@incluit.com">Luciano Fernandez</maintainer>

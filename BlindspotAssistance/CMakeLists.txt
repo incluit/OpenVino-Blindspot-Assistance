@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required (VERSION 3.10)
 
 include(CMakeLists_common.cmake)
 
@@ -51,10 +51,21 @@ source_group("include" FILES ${MAIN_HEADERS})
 
 # Create library file from sources.
 
+
 project(${TARGET_NAME})
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+
+find_package(ament_index_cpp REQUIRED)
+find_package(rcutils)
+find_package(rosidl_typesupport_cpp REQUIRED)
+find_package(ets_msgs REQUIRED)
+
+include_directories (ets_ros2/install/ets_plugin/include)
+include_directories (ets_ros2/install/ets_msgs/include)
+include_directories (ets_ros2/install/ets_cpp_client/include)
+include_directories (src/common)
 
 add_executable(${TARGET_NAME} ${MAIN_SRC} ${MAIN_HEADERS})
 ament_target_dependencies(${TARGET_NAME} 
@@ -64,14 +75,8 @@ ament_target_dependencies(${TARGET_NAME}
     "std_msgs"
     "ets_msgs"
     "OpenCV")
-#rclcpp std_msgs)
 install(TARGETS ${TARGET_NAME}
   DESTINATION lib/${PROJECT_NAME})
-
-# add_executable(listener src/rosSuscriber.cpp)
-# ament_target_dependencies(listener rclcpp std_msgs)
-# install(TARGETS listener
-#  DESTINATION lib/${PROJECT_NAME})
 
 set_target_properties(${TARGET_NAME} PROPERTIES
     POSITION_INDEPENDENT_CODE ON

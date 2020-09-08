@@ -51,12 +51,9 @@ RUN apt-get install -y --no-install-recommends \
 
 # ETS-ROS2
 RUN git clone https://github.com/HernanG234/ets_ros2/
-#WORKDIR /opt/intel/openvino/deployment_tools
-#RUN git clone https://github.com/opencv/open_model_zoo.git
-#WORKDIR /opt/intel/openvino/deployment_tools/open_model_zoo
-#RUN git checkout 2020.3
-WORKDIR /opt/intel/openvino//deployment_tools/open_model_zoo/tools/downloader
+WORKDIR /opt/intel/openvino/deployment_tools/open_model_zoo/tools/downloader
 RUN /bin/bash -c 'python3 -mpip install --user -r ./requirements.in'
+
 ADD . /app
 # Build ROS2 environment
 WORKDIR /app/BlindspotAssistance/ets_ros2
