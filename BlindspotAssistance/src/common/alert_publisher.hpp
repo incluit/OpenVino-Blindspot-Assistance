@@ -16,7 +16,7 @@ class AlertPublisher {
     int microservice_size = 2;
     int date_size = 10;
     int time_size = 8;
-    int spaces = 3;
+    int commas = 3;
 
     public:
 
