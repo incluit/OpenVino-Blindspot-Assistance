@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.5)
 
 include(CMakeLists_common.cmake)
 
@@ -50,7 +50,28 @@ source_group("src" FILES ${MAIN_SRC})
 source_group("include" FILES ${MAIN_HEADERS})
 
 # Create library file from sources.
+
+project(${TARGET_NAME})
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+
 add_executable(${TARGET_NAME} ${MAIN_SRC} ${MAIN_HEADERS})
+ament_target_dependencies(${TARGET_NAME} 
+    "rclcpp"
+    "rcutils"
+    "rosidl_typesupport_cpp"
+    "std_msgs"
+    "ets_msgs"
+    "OpenCV")
+#rclcpp std_msgs)
+install(TARGETS ${TARGET_NAME}
+  DESTINATION lib/${PROJECT_NAME})
+
+# add_executable(listener src/rosSuscriber.cpp)
+# ament_target_dependencies(listener rclcpp std_msgs)
+# install(TARGETS listener
+#  DESTINATION lib/${PROJECT_NAME})
 
 set_target_properties(${TARGET_NAME} PROPERTIES
     POSITION_INDEPENDENT_CODE ON
