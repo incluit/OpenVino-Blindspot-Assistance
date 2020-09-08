@@ -133,6 +133,7 @@ namespace
     bool firstTime = true;
     cv::Rect2d roi[MAX_INPUTS];
     int camDetections[MAX_INPUTS];
+    AlertPublisher alertPublisher = AlertPublisher("BS");
 
     void drawDetections(cv::Mat &img, const std::vector<Detection> &detections)
     {
@@ -157,7 +158,23 @@ namespace
         }
     }
 
-    int areaDetectionCount(cv::Mat &img, const std::vector<Detection> &detections, cv::Rect2d roi)
+    void alertHandler(size_t i, const Detection &f){
+
+        std::string payload = std::to_string(i)+","+std::to_string(f.label)+","+std::to_string(f.confidence);
+
+        int n = payload.length();
+
+        // declaring character array
+        char char_array[n + 1];
+
+        // copying the contents of the
+        // string to char array
+        strcpy(char_array, payload.c_str());
+        alertPublisher.sendAlert(char_array);
+
+    }
+
+    int areaDetectionCount(cv::Mat &img, const std::vector<Detection> &detections, size_t i, cv::Rect2d roi)
     {
         int count = 0;
 
@@ -173,6 +190,11 @@ namespace
                 if (y > roi.y && y < roi.y + roi.height)
                 {
                     count += 1;
+
+                    // Send alert if enable
+                    if (FLAGS_alerts){
+                        alertHandler(i+1, f);
+                    } 
                 }
             }
         }
@@ -273,7 +295,7 @@ namespace
                 {
                     drawDetections(windowPart, elem->detections.get<std::vector<Detection>>());
                 }
-                camDetections[i] = areaDetectionCount(windowPart, elem->detections.get<std::vector<Detection>>(), roi[i]);
+                camDetections[i] = areaDetectionCount(windowPart, elem->detections.get<std::vector<Detection>>(), i, roi[i]);
             }
         };
 
@@ -515,7 +537,6 @@ int main(int argc, char *argv[])
 
         cv::Size graphSize{static_cast<int>(params.windowSize.width / 4), 60};
         Presenter presenter(FLAGS_u, params.windowSize.height - graphSize.height - 10, graphSize);
-
         const size_t outputQueueSize = 1;
         AsyncOutput output(FLAGS_show_stats, outputQueueSize,
                            [&](const std::vector<std::shared_ptr<VideoFrame>> &result) {
@@ -533,9 +554,6 @@ int main(int argc, char *argv[])
                            });
 
         output.start();
-
-        ////////////    Messenger Init  ////////////////
-        AlertPublisher alertPublisher = AlertPublisher("BS");
 
         using timer = std::chrono::high_resolution_clock;
         using duration = std::chrono::duration<float, std::milli>;
@@ -575,11 +593,6 @@ int main(int argc, char *argv[])
                 }
             }
             ++fpsCounter;
-
-            if (FLAGS_alerts)
-            {
-                alertPublisher.sendAlert("test");
-            }
 
             if (!output.isAlive())
             {
