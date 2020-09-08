@@ -41,10 +41,10 @@ class AlertPublisher {
         
         // Send message to all subscribers
         int payload_size = (int) strlen(payload) + 1;
-        int message_size = microservice_size + date_size + time_size + payload_size + spaces;
+        int message_size = microservice_size + date_size + time_size + payload_size + commas;
         zmq::message_t message(message_size);
-        snprintf ((char *) message.data(), message_size, "%s %s %s %s", microservice, date, time, payload);
-        std::cout << "Microservice " << microservice << " sending alert: " << message << std::endl;
-        publisher.send(message, ZMQ_DONTWAIT);
+        snprintf ((char *) message.data(), message_size, "%s,%s,%s,%s", microservice, date, time, payload);
+        std::cout << "Microservice " << microservice << " sending alert: " << message.to_string() << std::endl;
+        publisher.send(message, zmq::send_flags::dontwait);
     }
 };
