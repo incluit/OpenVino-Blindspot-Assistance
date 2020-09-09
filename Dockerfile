@@ -50,6 +50,7 @@ RUN apt-get install -y --no-install-recommends \
         ros-crystal-ros2bag*
 
 # ETS-ROS2
+WORKDIR /app/BlindspotAssistance/
 RUN git clone https://github.com/HernanG234/ets_ros2/
 WORKDIR /opt/intel/openvino/deployment_tools/open_model_zoo/tools/downloader
 RUN /bin/bash -c 'python3 -mpip install --user -r ./requirements.in'
@@ -66,5 +67,5 @@ RUN /bin/bash -c 'source /opt/ros/crystal/setup.bash && source /app/BlindspotAss
 # Set Makefile
 COPY BlindspotAssistance/Makefile /app/BlindspotAssistance/build/intel64/Release
 
-WORKDIR /app/BlindspotAssistance/build/intel64/Release
+#WORKDIR /app/BlindspotAssistance/build/intel64/Release
 CMD ["/bin/bash"]

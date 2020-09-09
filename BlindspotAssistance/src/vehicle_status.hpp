@@ -5,10 +5,46 @@
 #include <boost/circular_buffer.hpp>
 #include "std_msgs/msg/string.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "ets_msgs/msg/truck.hpp"
+//#include "ets_msgs/msg/truck.hpp"
+/////////////////
 
+#include <gflags/gflags.h>
+#include <functional>
+#include <iostream>
+#include <ctime>
+#include <fstream>
+#include <random>
+#include <memory>
+#include <chrono>
+#include <vector>
+#include <string>
+#include <utility>
+#include <algorithm>
+#include <iterator>
+#include <map>
+#include <thread>
+#include <mutex>
+#include <math.h>
+#include <sys/types.h>
+#include <signal.h>
 
-// #ifdef SIMULATOR
+#include <inference_engine.hpp>
+
+#include "classes.hpp"
+//#include "rclcpp/rclcpp.hpp"
+//#include "ets_msgs/msg/truck.hpp"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+
+#include <sys/ioctl.h> // Library to use ioctl function
+//////////////////
+
+Truck truck;
+
+#ifdef SIMULATOR
 void Truck::ros_callback(const ets_msgs::msg::Truck::SharedPtr msg)
 {
     this->setSpeed(msg->speed);
@@ -20,9 +56,8 @@ void Truck::ros_callback(const ets_msgs::msg::Truck::SharedPtr msg)
     this->setPosition(msg->x, msg->y, msg->z, msg->heading, msg->pitch, msg->roll);
     this->setParkingBrake(msg->parking_brake);
 }
-// #endif
+#endif
 
-Truck truck;
 void ros_client(Truck *truck)
 {
 	auto node = rclcpp::Node::make_shared("ets_client");

@@ -51,21 +51,23 @@ source_group("include" FILES ${MAIN_HEADERS})
 
 # Create library file from sources.
 
+#find_package(gflags REQUIRED)
 
 project(${TARGET_NAME})
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-
-find_package(ament_index_cpp REQUIRED)
-find_package(rcutils)
-find_package(rosidl_typesupport_cpp REQUIRED)
-find_package(ets_msgs REQUIRED)
 
 include_directories (ets_ros2/install/ets_plugin/include)
 include_directories (ets_ros2/install/ets_msgs/include)
 include_directories (ets_ros2/install/ets_cpp_client/include)
 include_directories (src/common)
+
+find_package(ament_index_cpp REQUIRED)
+find_package(rcutils)
+find_package(rosidl_typesupport_cpp REQUIRED)
+#find_package(ets_msgs REQUIRED)
 
 add_executable(${TARGET_NAME} ${MAIN_SRC} ${MAIN_HEADERS})
 ament_target_dependencies(${TARGET_NAME} 
@@ -73,7 +75,7 @@ ament_target_dependencies(${TARGET_NAME}
     "rcutils"
     "rosidl_typesupport_cpp"
     "std_msgs"
-    "ets_msgs"
+    #"ets_msgs"
     "OpenCV")
 install(TARGETS ${TARGET_NAME}
   DESTINATION lib/${PROJECT_NAME})
