@@ -133,7 +133,7 @@ namespace
     bool firstTime = true;
     cv::Rect2d roi[MAX_INPUTS];
     int camDetections[MAX_INPUTS];
-    AlertPublisher alertPublisher = AlertPublisher("BS");
+    AlertPublisher alertPublisher = AlertPublisher("BLAS");
 
     void drawDetections(cv::Mat &img, const std::vector<Detection> &detections)
     {

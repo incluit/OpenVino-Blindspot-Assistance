@@ -13,7 +13,7 @@ class AlertPublisher {
     zmq::context_t context;
     zmq::socket_t publisher;
     char microservice [3];
-    int microservice_size = 2;
+    int microservice_size = 4;
     int date_size = 10;
     int time_size = 8;
     int commas = 3;
