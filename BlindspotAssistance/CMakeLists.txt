@@ -13,6 +13,7 @@
 # limitations under the License.
 
 cmake_minimum_required (VERSION 3.10)
+add_definitions(-DSIMULATOR)
 
 include(CMakeLists_common.cmake)
 
@@ -67,7 +68,7 @@ include_directories (src/common)
 find_package(ament_index_cpp REQUIRED)
 find_package(rcutils)
 find_package(rosidl_typesupport_cpp REQUIRED)
-#find_package(ets_msgs REQUIRED)
+find_package(ets_msgs REQUIRED)
 
 add_executable(${TARGET_NAME} ${MAIN_SRC} ${MAIN_HEADERS})
 ament_target_dependencies(${TARGET_NAME} 
@@ -75,7 +76,7 @@ ament_target_dependencies(${TARGET_NAME}
     "rcutils"
     "rosidl_typesupport_cpp"
     "std_msgs"
-    #"ets_msgs"
+    "ets_msgs"
     "OpenCV")
 install(TARGETS ${TARGET_NAME}
   DESTINATION lib/${PROJECT_NAME})
