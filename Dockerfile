@@ -67,5 +67,5 @@ RUN /bin/bash -c 'source /opt/ros/crystal/setup.bash && source /app/BlindspotAss
 # Set Makefile
 COPY BlindspotAssistance/Makefile /app/BlindspotAssistance/build/intel64/Release
 
-#WORKDIR /app/BlindspotAssistance/build/intel64/Release
+WORKDIR /app/BlindspotAssistance/build/intel64/Release
 CMD ["/bin/bash"]
