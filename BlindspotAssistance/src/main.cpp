@@ -41,6 +41,7 @@
 #include "graph.hpp"
 
 #include "alert_publisher.hpp"
+#include "vehicle_status.hpp"
 
 namespace
 {
@@ -653,6 +654,9 @@ int main(int argc, char *argv[])
 
                     statStream << "Render time: " << outputStat.renderTime
                                << "ms" << std::endl;
+                    vehicle_status vehicle;
+                    std::string mode = vehicle.get_mode_to_string();
+                    statStream << "Mode: " << mode << std::endl;
                     if (FLAGS_show_calibration)
                     {
                         for (int i = 0; i < MAX_INPUTS; i++)
