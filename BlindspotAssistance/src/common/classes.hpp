@@ -19,19 +19,24 @@ class Vehicle
         float getCruiseControl() {return cruiseControl; }
         void calc_mocked_status(){
             int elapsed_time = time(NULL) - current_time;
-            std::cout << elapsed_time << " seconds has passed." << std::endl;
+            if (elapsed_time % 10 == 0) 
+                std::cout << elapsed_time << " seconds has passed." << std::endl;
 
             if (elapsed_time < 12)
                 parkingBrakeON = true;
             else if (elapsed_time < 24){
                 parkingBrakeON = false;
-                speed = -0.06;
+                speed = 0;
             }
             else if (elapsed_time < 36)
-                speed = 0;
-            else if (elapsed_time < 48)
                 speed = 20;
-            else if (elapsed_time < 60)
+            else if (elapsed_time < 48)
                 speed = 100;
+            else if (elapsed_time < 60)
+                speed = 20;
+            else if (elapsed_time < 72)
+                speed = 0;
+            else
+                parkingBrakeON = true;
         }
 };
