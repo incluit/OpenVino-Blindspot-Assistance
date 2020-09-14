@@ -17,8 +17,7 @@ class vehicle_status
         Modes mode = Modes::surveillance;
         bool engine_on, trailer_on, cruise_control_on;
         Vehicle vehicle;
-    public:
-        Modes get_mode(){ 
+        void calc_mode(){
             if (vehicle.getParkingBrake())
                 mode = Modes::parking;
             else if (vehicle.getSpeed() < -0.03)
@@ -29,19 +28,25 @@ class vehicle_status
                 mode = Modes::urban_driving;
             else
                 mode = Modes::highway;
+        }
+    public:
+        Modes get_mode(){
+            calc_mode();
             return mode;
         }
         std::string get_mode_to_string(){
+            vehicle.calc_mocked_status();
+            calc_mode();
             if( mode == Modes::parking )
-                return "parking";
+                return "Parking";
             if( mode == Modes::reverse )
-                return "reverse";
+                return "Reverse";
             if( mode == Modes::surveillance )
-                return "surveillance";
+                return "Surveillance";
             if( mode == Modes::urban_driving )
-                return "urban_driving";
+                return "Urban Driving";
             if( mode == Modes::highway )
-                return "highway";
+                return "Highway";
             return "unknown";
         }
         bool isEngineON(){ 
