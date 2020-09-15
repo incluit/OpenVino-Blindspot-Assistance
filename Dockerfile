@@ -1,6 +1,5 @@
 FROM openvino/ubuntu18_dev:2020.3
 
-ADD . /app
 WORKDIR /app
 
 USER root
@@ -34,7 +33,8 @@ WORKDIR /root/cppzmq/build
 RUN cmake ..
 RUN make -j4 install
 
-#Blindspot
+# Blindspot
+ADD . /app
 WORKDIR /app/BlindspotAssistance
 RUN mkdir -p build
 WORKDIR /app/BlindspotAssistance/build
@@ -42,7 +42,7 @@ RUN /bin/bash -c 'source /opt/intel/openvino/bin/setupvars.sh && cmake -DCMAKE_B
 COPY BlindspotAssistance/Makefile /app/BlindspotAssistance/build/intel64/Release
 RUN /bin/bash -c 'source /opt/intel/openvino/bin/setupvars.sh && bash ../scripts/download_models.sh'
 
-#
+# Initial configuration
 RUN lsb_release -a
 WORKDIR /app/BlindspotAssistance/build/intel64/Release
 CMD ["/bin/bash"]

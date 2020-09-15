@@ -41,6 +41,7 @@
 #include "graph.hpp"
 
 #include "alert_publisher.hpp"
+#include "vehicle_status.hpp"
 
 namespace
 {
@@ -376,14 +377,14 @@ int main(int argc, char *argv[])
 {
     try
     {
+        vehicle_status vehicle;
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
         slog::info << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
-        if (!ParseAndCheckCommandLine(argc, argv))
-        {
+        if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
 
@@ -391,8 +392,7 @@ int main(int argc, char *argv[])
 
         std::string modelPath = FLAGS_m;
         std::size_t found = modelPath.find_last_of(".");
-        if (found > modelPath.size())
-        {
+        if (found > modelPath.size()) {
             slog::info << "Invalid model name: " << modelPath << slog::endl;
             slog::info << "Expected to be <model_name>.xml" << slog::endl;
             return -1;
@@ -411,8 +411,7 @@ int main(int argc, char *argv[])
 
         std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
         auto inputDims = network->getInputDims();
-        if (4 != inputDims.size())
-        {
+        if (4 != inputDims.size()) {
             throw std::runtime_error("Invalid network input dimensions");
         }
 
@@ -426,16 +425,14 @@ int main(int argc, char *argv[])
         const auto duplicateFactor = (1 + FLAGS_duplicate_num);
         size_t numberOfInputs = (FLAGS_nc + files.size()) * duplicateFactor;
 
-        if (numberOfInputs == 0)
-        {
+        if (numberOfInputs == 0) {
             throw std::runtime_error("No valid inputs were supplied");
         }
 
         DisplayParams params = prepareDisplayParams(numberOfInputs);
 
         slog::info << "\tNumber of input channels:    " << numberOfInputs << slog::endl;
-        if (numberOfInputs > MAX_INPUTS)
-        {
+        if (numberOfInputs > MAX_INPUTS) {
             throw std::logic_error("Number of inputs exceed maximum value [25]");
         }
 
@@ -447,33 +444,25 @@ int main(int argc, char *argv[])
         vsParams.expectedWidth = static_cast<unsigned>(inputDims[3]);
 
         VideoSources sources(vsParams);
-        if (!files.empty())
-        {
+        if (!files.empty()) {
             slog::info << "Trying to open input video ..." << slog::endl;
-            for (auto &file : files)
-            {
-                try
-                {
+            for (auto &file : files){
+                try{
                     sources.openVideo(file, false, FLAGS_loop_video);
                 }
-                catch (...)
-                {
+                catch (...){
                     slog::info << "Cannot open video [" << file << "]" << slog::endl;
                     throw;
                 }
             }
         }
-        if (FLAGS_nc)
-        {
+        if (FLAGS_nc) {
             slog::info << "Trying to connect " << FLAGS_nc << " web cams ..." << slog::endl;
-            for (size_t i = 0; i < FLAGS_nc; ++i)
-            {
-                try
-                {
+            for (size_t i = 0; i < FLAGS_nc; ++i){
+                try{
                     sources.openVideo(std::to_string(i), true, false);
                 }
-                catch (...)
-                {
+                catch (...){
                     slog::info << "Cannot open web cam [" << i << "]" << slog::endl;
                     throw;
                 }
@@ -529,8 +518,7 @@ int main(int argc, char *argv[])
         std::stringstream statStream;
 
         std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show)
-        {
+        if (!FLAGS_no_show) {
             std::cout << " or switch to the output window and press ESC key";
         }
         std::cout << std::endl;
@@ -564,26 +552,20 @@ int main(int argc, char *argv[])
 
         size_t perfItersCounter = 0;
 
-        while (sources.isRunning() || network->isRunning())
-        {
+        while (sources.isRunning() || network->isRunning()) {
             bool readData = true;
-            while (readData)
-            {
+            while (readData) {
                 auto br = network->getBatchData(params.frameSize);
-                if (br.empty())
-                {
+                if (br.empty()){
                     break; // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
                 }
-                for (size_t i = 0; i < br.size(); i++)
-                {
+                for (size_t i = 0; i < br.size(); i++){
                     // this approach waits for the next input image for sourceIdx. If provided a single image,
                     // it may not show results, especially if -real_input_fps is enabled
                     auto val = static_cast<unsigned int>(br[i]->sourceIdx);
                     auto it = find_if(batchRes.begin(), batchRes.end(), [val](const std::shared_ptr<VideoFrame> &vf) { return vf->sourceIdx == val; });
-                    if (it != batchRes.end())
-                    {
-                        if (!FLAGS_no_show)
-                        {
+                    if (it != batchRes.end()){
+                        if (!FLAGS_no_show){
                             output.push(std::move(batchRes));
                         }
                         batchRes.clear();
@@ -594,36 +576,29 @@ int main(int argc, char *argv[])
             }
             ++fpsCounter;
 
-            if (!output.isAlive())
-            {
+            if (!output.isAlive()) {
                 break;
             }
 
             auto currTime = timer::now();
             auto deltaTime = (currTime - lastTime);
-            if (deltaTime >= samplingTimeout)
-            {
-                auto durMsec =
-                    std::chrono::duration_cast<duration>(deltaTime).count();
+            if (deltaTime >= samplingTimeout) {
+                auto durMsec = std::chrono::duration_cast<duration>(deltaTime).count();
                 auto frameTime = durMsec / static_cast<float>(fpsCounter);
                 fpsCounter = 0;
                 lastTime = currTime;
 
-                if (FLAGS_no_show)
-                {
+                if (FLAGS_no_show) {
                     slog::info << "Average Throughput : " << 1000.f / frameTime << " fps" << slog::endl;
-                    if (++perfItersCounter >= FLAGS_n_sp)
-                    {
+                    if (++perfItersCounter >= FLAGS_n_sp){
                         break;
                     }
                 }
-                else
-                {
+                else{
                     averageFps = frameTime;
                 }
 
-                if (FLAGS_show_stats)
-                {
+                if (FLAGS_show_stats) {
                     auto inputStat = sources.getStats();
                     auto inferStat = network->getStats();
                     auto outputStat = output.getStats();
@@ -632,10 +607,8 @@ int main(int argc, char *argv[])
                     statStream.str(std::string());
                     statStream << std::fixed << std::setprecision(1);
                     statStream << "Input reads: ";
-                    for (size_t i = 0; i < inputStat.readTimes.size(); ++i)
-                    {
-                        if (0 == (i % 4))
-                        {
+                    for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
+                        if (0 == (i % 4)) {
                             statStream << std::endl;
                         }
                         statStream << inputStat.readTimes[i] << "ms ";
@@ -653,16 +626,14 @@ int main(int argc, char *argv[])
 
                     statStream << "Render time: " << outputStat.renderTime
                                << "ms" << std::endl;
-                    if (FLAGS_show_calibration)
-                    {
-                        for (int i = 0; i < MAX_INPUTS; i++)
-                        {
+                    statStream << "Mode: " << vehicle.get_mode_to_string() << std::endl;
+                    if (FLAGS_show_calibration) {
+                        for (int i = 0; i < MAX_INPUTS; i++) {
                             statStream << "Cam " << std::to_string(i + 1) << ": " << std::to_string(camDetections[i]) << std::endl;
                         }
                     }
 
-                    if (FLAGS_no_show)
-                    {
+                    if (FLAGS_no_show) {
                         slog::info << statStream.str() << slog::endl;
                     }
                 }
