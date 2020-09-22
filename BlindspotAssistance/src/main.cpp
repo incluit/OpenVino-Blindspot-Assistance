@@ -80,6 +80,7 @@ namespace
         std::cout << "    -calibration                 " << calibration_message << std::endl;
         std::cout << "    -show_calibration            " << show_calibration_message << std::endl;
         std::cout << "    -alerts                      " << alerts_message << std::endl;
+        std::cout << "    -dm                          " << driver_mode << std::endl;
     }
 
     bool ParseAndCheckCommandLine(int argc, char *argv[])

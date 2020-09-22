@@ -35,6 +35,7 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 static const char calibration_message[] = "Optional. Camera calibration.";
 static const char show_calibration_message[] = "Optional. Show camera calibration.";
 static const char alerts_message[] = "Optional. Send alerts to AlertManager.";
+static const char driver_mode[] = "Optional. Force a specific driver mode.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(m, "", model_path_message);
@@ -59,3 +60,4 @@ DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_bool(calibration, false, calibration_message);
 DEFINE_bool(show_calibration, false, show_calibration_message);
 DEFINE_bool(alerts, false, alerts_message);
+DEFINE_string(dm, "", driver_mode);
