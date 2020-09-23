@@ -12,10 +12,10 @@ enum class Modes {
     highway
 };
 
-class vehicle_status
+class VehicleStatus
 {
     private:
-        Modes mode = Modes::surveillance;
+        Modes mode = Modes::unknown;
         bool engine_on, trailer_on, cruise_control_on;
         Vehicle vehicle;
         void setModeByFlag(){
@@ -49,18 +49,18 @@ class vehicle_status
                 mode = Modes::highway;
         }
     public:
-        Modes get_mode(){
-            calc_mode();
-            return mode;
-        }
-        std::string get_mode_to_string(){
+        void find_mode(){
             if (!FLAGS_dm.empty())
                 setModeByFlag();
             else{
                 vehicle.calc_mocked_status();
                 calc_mode();
             }
-
+        }
+        Modes get_mode(){
+            return mode;
+        }
+        std::string get_mode_to_string(){
             if( mode == Modes::parking )
                 return "Parking";
             if( mode == Modes::reverse )

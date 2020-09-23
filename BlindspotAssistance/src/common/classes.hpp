@@ -19,8 +19,6 @@ class Vehicle
         float getCruiseControl() {return cruiseControl; }
         void calc_mocked_status(){
             int elapsed_time = time(NULL) - current_time;
-            if (elapsed_time % 10 == 0) 
-                std::cout << elapsed_time << " seconds has passed." << std::endl;
 
             if (elapsed_time < 12)
                 parkingBrakeON = true;

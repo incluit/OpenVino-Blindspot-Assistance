@@ -160,23 +160,20 @@ namespace
         }
     }
 
-    void alertHandler(size_t i, const Detection &f){
+    void alertHandler(size_t i, const Detection &f, VehicleStatus *vehicle){
 
-        std::string payload = std::to_string(i)+","+std::to_string(f.label)+","+std::to_string(f.confidence);
+        vehicle->find_mode();
+        std::string payload = std::to_string(i)+","+std::to_string(f.label)+","+std::to_string(f.confidence)+","+vehicle->get_mode_to_string();
 
-        int n = payload.length();
-
-        // declaring character array
-        char char_array[n + 1];
-
-        // copying the contents of the
-        // string to char array
+        // copying the contents of the string to char array
+        char char_array[payload.length() + 1];
         strcpy(char_array, payload.c_str());
+
         alertPublisher.sendAlert(char_array);
 
     }
 
-    int areaDetectionCount(cv::Mat &img, const std::vector<Detection> &detections, size_t i, cv::Rect2d roi)
+    int areaDetectionCount(cv::Mat &img, const std::vector<Detection> &detections, size_t i, cv::Rect2d roi, VehicleStatus *vehicle)
     {
         int count = 0;
 
@@ -195,7 +192,7 @@ namespace
 
                     // Send alert if enable
                     if (FLAGS_alerts){
-                        alertHandler(i+1, f);
+                        alertHandler(i+1, f, vehicle);
                     } 
                 }
             }
@@ -280,10 +277,9 @@ namespace
     }
 
     void displayNSources(const std::vector<std::shared_ptr<VideoFrame>> &data,
-                         float time,
-                         const std::string &stats,
-                         DisplayParams params,
-                         Presenter &presenter)
+                         float time, const std::string &stats,
+                         DisplayParams params, Presenter &presenter,
+                         VehicleStatus *vehicle)
     {
         cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
         auto loopBody = [&](size_t i) {
@@ -297,7 +293,7 @@ namespace
                 {
                     drawDetections(windowPart, elem->detections.get<std::vector<Detection>>());
                 }
-                camDetections[i] = areaDetectionCount(windowPart, elem->detections.get<std::vector<Detection>>(), i, roi[i]);
+                camDetections[i] = areaDetectionCount(windowPart, elem->detections.get<std::vector<Detection>>(), i, roi[i], vehicle);
             }
         };
 
@@ -378,7 +374,7 @@ int main(int argc, char *argv[])
 {
     try
     {
-        vehicle_status vehicle;
+        VehicleStatus vehicle;
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
@@ -535,7 +531,7 @@ int main(int argc, char *argv[])
                                    std::unique_lock<std::mutex> lock(statMutex);
                                    str = statStream.str();
                                }
-                               displayNSources(result, averageFps, str, params, presenter);
+                               displayNSources(result, averageFps, str, params, presenter, &vehicle);
                                int key = cv::waitKey(1);
                                presenter.handleKey(key);
 
