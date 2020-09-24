@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "classes.hpp"
+#include "multichannel_params.hpp"
 
 enum class Modes {
     unknown,
@@ -11,12 +12,30 @@ enum class Modes {
     highway
 };
 
-class vehicle_status
+class VehicleStatus
 {
     private:
-        Modes mode = Modes::surveillance;
+        Modes mode = Modes::unknown;
         bool engine_on, trailer_on, cruise_control_on;
         Vehicle vehicle;
+        void setModeByFlag(){
+            std::string driver_mode = FLAGS_dm;
+            // driver_mode to lowercase
+            std::transform(driver_mode.begin(), driver_mode.end(), driver_mode.begin(),
+                            [](unsigned char c){ return std::tolower(c); });
+            if (driver_mode == "parking")
+                mode = Modes::parking;
+            else if (driver_mode == "reverse")
+                mode = Modes::reverse;
+            else if (driver_mode == "surveillance")
+                mode = Modes::surveillance;
+            else if (driver_mode == "urban")
+                mode = Modes::urban_driving;
+            else if (driver_mode == "highway")
+                mode = Modes::highway;
+            else
+                mode = Modes::unknown;
+        }
         void calc_mode(){
             if (vehicle.getParkingBrake())
                 mode = Modes::parking;
@@ -30,13 +49,18 @@ class vehicle_status
                 mode = Modes::highway;
         }
     public:
+        void find_mode(){
+            if (!FLAGS_dm.empty())
+                setModeByFlag();
+            else{
+                vehicle.calc_mocked_status();
+                calc_mode();
+            }
+        }
         Modes get_mode(){
-            calc_mode();
             return mode;
         }
         std::string get_mode_to_string(){
-            vehicle.calc_mocked_status();
-            calc_mode();
             if( mode == Modes::parking )
                 return "Parking";
             if( mode == Modes::reverse )
