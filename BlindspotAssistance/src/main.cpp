@@ -344,8 +344,68 @@ namespace
                 std::cout << "Selec Area Detection. Cam: " << std::to_string(i + 1) << std::endl;
                 roi[i] = areaDetection(windowImage, i, params.points[i], params.frameSize);
             }
-            /* saveArea(roi); */
+            saveArea(roi);
             firstTime = false;
+
+            //-----------------------Define Regions of Interest (ROI)-----------------------------------------------------
+            RegionsOfInterest scene;
+
+            cap.read(scene.orig);
+            // Do deep copy to preserve original frame
+            scene.aux = scene.orig.clone();
+            scene.out = scene.orig.clone();
+            cv::Mat aux_mask;
+            std::vector<cv::Mat> mask_sidewalk;
+            std::vector<cv::Mat> mask_crosswalk;
+            std::vector<std::pair<cv::Mat, int>> mask_streets;
+
+            cv::Mat first_frame_masked = scene.orig.clone();
+
+        // To draw areas of interest you should run the command with the -show_selection argument
+            int ret = 0;
+
+            // Define Crop Area
+            std::string winname;
+            winname = "Crop";
+            cv::namedWindow(winname);
+            cv::moveWindow(winname, 10, 10);
+            cv::setMouseCallback(winname, CallBCrop, &scene);
+            ret = CropFrame(winname, &scene);
+            if (ret < 0)
+            {
+                return FAIL;
+            }
+
+            // Define Draw Areas
+            cv::destroyWindow(winname);
+            winname = "Draw Areas";
+            cv::namedWindow(winname);
+            cv::moveWindow(winname, 10, 10);
+            cv::setMouseCallback(winname, CallBDraw, &scene);
+            ret = DrawAreasOfInterest(winname, &scene);
+            if (ret < 0)
+            {
+                return FAIL;
+            }
+
+            // Show Results
+            cv::destroyWindow(winname);
+            winname = "Result";
+            cv::namedWindow(winname);
+            cv::moveWindow(winname, 10, 10);
+            cv::imshow(winname, scene.out);
+            std::cout << "Showing selection result, press any key to continue." << std::endl;
+
+            cv::waitKey();
+            aux_mask = scene.mask;
+            mask_crosswalk = scene.mask_crosswalks;
+            mask_sidewalk = scene.mask_sidewalks;
+            mask_streets = scene.mask_streets;
+
+            cv::bitwise_and(scene.orig, aux_mask, first_frame_masked);
+            cv::imshow(winname, first_frame_masked);
+            cv::waitKey();
+            cv::destroyWindow(winname);
         }
 
         // Draw Area Detection
