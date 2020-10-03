@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/publisher-many.dir/publisher_many.o  -o publisher-many -leismsgbus -leisutils -leismsgenv -lpthread 

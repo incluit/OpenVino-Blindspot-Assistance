@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/pubsub-threads.dir/pubsub_threads.o  -o pubsub-threads -leismsgbus -leisutils -leismsgenv -lpthread 

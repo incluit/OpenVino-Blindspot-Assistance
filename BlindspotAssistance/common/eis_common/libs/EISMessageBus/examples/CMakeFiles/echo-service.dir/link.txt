@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/echo-service.dir/echo_service.o  -o echo-service -leismsgbus -leisutils -leismsgenv -lpthread 

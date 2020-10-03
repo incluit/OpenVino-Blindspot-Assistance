@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/libs/EISMessageBus/examples/pubsub_threads.cpp
+chrono
+-
+cstring
+-
+csignal
+-
+condition_variable
+-
+eis/utils/logger.h
+-
+eis/utils/json_config.h
+-
+eis/msgbus/msgbus.h
+/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/libs/EISMessageBus/examples/eis/msgbus/msgbus.h
+

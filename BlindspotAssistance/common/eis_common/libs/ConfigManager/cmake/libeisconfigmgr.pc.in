@@ -1,0 +1,12 @@
+prefix=@DEST_DIR@
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libeisconfigmgr
+Description: EIS Config Manager library.
+Version: @PROJECT_VERSION@
+
+Libs: -L${libdir} -leisconfigmgr
+Libs.private: @PRIVATE_LIBS@
+Cflags: -I${includedir}

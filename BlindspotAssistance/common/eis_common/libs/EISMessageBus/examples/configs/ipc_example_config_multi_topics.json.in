@@ -1,0 +1,13 @@
+{
+    "type": "zmq_ipc",
+    "socket_dir": "${CMAKE_CURRENT_BINARY_DIR}/.socks",
+    "pub-0": {
+        "socket_file": "multi-topics"
+    },
+    "pub-1": {
+       "socket_file": "multi-topics"
+    },
+    "pub-": {
+       "socket_file": "multi-topics"
+    }
+}

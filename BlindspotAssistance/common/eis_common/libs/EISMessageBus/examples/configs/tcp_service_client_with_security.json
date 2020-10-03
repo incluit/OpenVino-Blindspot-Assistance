@@ -1,0 +1,10 @@
+{
+    "type": "zmq_tcp",
+    "echo_service": {
+        "host": "127.0.0.1",
+        "port": 8675,
+        "server_public_key": "/lrrKB:uXh03hM[1w)J?c]YDn/iwN(ks@%Q]teNF",
+        "client_secret_key": "5sdpW^29${XIjAj1KQj)doalM5>(7Fw8=M+[(g$z",
+        "client_public_key": ".mr+(@E5sWDP?MWNxZ%O^.:gHQ2qIzC7?I%HXH&H"
+    }
+}
