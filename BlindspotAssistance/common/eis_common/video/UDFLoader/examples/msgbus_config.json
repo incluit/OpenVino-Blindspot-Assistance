@@ -1,4 +1,0 @@
-{
-    "type": "zmq_ipc",
-    "socket_dir": "./.socks/"
-}

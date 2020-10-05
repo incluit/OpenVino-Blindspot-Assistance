@@ -1,8 +1,0 @@
-{
-    "udfs": [
-        {
-            "name": "py_tests.drop",
-            "type": "python"
-        }
-    ]
-}
