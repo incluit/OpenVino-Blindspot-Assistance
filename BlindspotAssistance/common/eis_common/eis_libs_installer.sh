@@ -50,18 +50,6 @@ cd $EISMessageBus/../../util/c/ &&
    cd .. ; fi  && \
    make install
 
-cd $ConfigManager &&
-   rm -rf build && \
-   mkdir build && \
-   cd build && \
-   cmake -DWITH_GO_ENV_CONFIG=ON -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} .. && \
-   cmake -DWITH_TESTS=${RUN_TESTS} -DWITH_PYTHON=ON -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} .. && \
-   make && \
-   if [ "${RUN_TESTS}" = "ON" ] ; then cd ./tests && \
-   ./env-config-tests && \
-   cd .. ; fi && \
-   make install
-
 # Installing EISMessageBus C++ from DEB package
 cd $EISMessageBus &&
    apt install ./eis-messagebus-2.3.0-Linux.deb

@@ -13,7 +13,7 @@ RUN apt-get install -y --no-install-recommends \
         gcc \
         make \
         wget \
-        vim \flo
+        vim \
         libssl-dev \
         sudo \
         gnutls-dev pkg-config
@@ -37,13 +37,12 @@ RUN cmake ..
 RUN make -j4 install
 
 # EIS message bus
-
+ADD . /app
 WORKDIR /app/BlindspotAssistance/common/eis_common
-RUN bash eis_libs_installer.sh
-
+RUN bash /app/BlindspotAssistance/common/eis_common/eis_libs_installer.sh
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
 
 # Blindspot
-ADD . /app
 WORKDIR /app/BlindspotAssistance
 RUN mkdir -p build
 WORKDIR /app/BlindspotAssistance/build
