@@ -90,7 +90,7 @@ public:
     };
 
     /**
-     * Destructur
+     * Destructor
      */
     ~ExampleMessage() {
         delete[] m_message;

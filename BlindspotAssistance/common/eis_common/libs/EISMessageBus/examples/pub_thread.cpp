@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Intel Corporation.
+// Copyright (c) 2020 Intel Corporation.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -86,7 +86,7 @@ public:
     };
 
     /**
-     * Destructur
+     * Destructor
      */
     ~ExampleMessage() {
         delete[] m_message;
@@ -156,11 +156,9 @@ void signal_handler(int signo) {
 }
 
 int main(int argc, char** argv) {
-    if(argc == 1) {
-        LOG_ERROR_0("Too few arguments");
-        return -1;
-    } else if(argc > 2) {
-        LOG_ERROR_0("Too many arguments");
+    if(argc == 1 || argc > 2) {
+        LOG_ERROR_0("Wrong number of arguments");
+        usage(argv[0]);
         return -1;
     }
 
