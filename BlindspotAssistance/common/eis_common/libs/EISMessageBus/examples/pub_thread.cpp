@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Intel Corporation.
+// Copyright (c) 2019 Intel Corporation.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -15,10 +15,11 @@
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
 /**
+ * @file
  * @brief EIS Message Bus example using the C++ thread helper classes.
  * @author Kevin Midkiff <kevin.midkiff@intel.com>
  */
@@ -26,21 +27,16 @@
 #include <chrono>
 #include <cstring>
 #include <csignal>
-#include <atomic>
 #include <condition_variable>
 
 #include <eis/utils/logger.h>
 #include <eis/utils/json_config.h>
 #include "eis/msgbus/msgbus.h"
 
-#define TOPIC "BLAS"
-#define SERVICE_NAME "sub-thread-example"
+#define SERVICE_NAME "pubsub-threads"
 
 using namespace eis::utils;
 using namespace eis::msgbus;
-using namespace std;
-// Globals
-std::atomic<bool> g_stop;
 
 /**
  * Example object which is both serializable and deserialzable
@@ -137,30 +133,33 @@ public:
     };
 };
 
+// Globals
+Publisher* g_publisher = NULL;
+MessageQueue* g_input_queue = NULL;
+
+/**
+ * Function to print the usage of the application.
+ */
+void usage(const char* name) {
+    fprintf(stderr, "usage: %s [-h|--help] <json-config>\n", name);
+    fprintf(stderr, "\t-h|--help   - Show this help\n");
+    fprintf(stderr, "\tjson-config - Path to JSON configuration file\n");
+}
+
 /**
  * Signal handler
  */
 void signal_handler(int signo) {
     LOG_INFO_0("Quitting...");
-    g_stop.store(true);
-}
-
-/**
- * Function to print publisher usage
- */
-void usage(const char* name) {
-    fprintf(stderr, "usage: %s [-h|--help] <json-config> [topic]\n", name);
-    fprintf(stderr, "\t-h|--help   - Show this help\n");
-    fprintf(stderr, "\tjson-config - Path to JSON configuration file\n");
-    fprintf(stderr, "\ttopic       - (Optional) Topic string "\
-                    "(df: publish_test)\n");
+    if(g_publisher != NULL)     delete g_publisher;
+    if(g_input_queue != NULL)   delete g_input_queue;
 }
 
 int main(int argc, char** argv) {
     if(argc == 1) {
         LOG_ERROR_0("Too few arguments");
         return -1;
-    } else if(argc > 3) {
+    } else if(argc > 2) {
         LOG_ERROR_0("Too many arguments");
         return -1;
     }
@@ -174,46 +173,38 @@ int main(int argc, char** argv) {
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
 
-    // Set log level
-    set_log_level(LOG_LVL_DEBUG);
-
-    config_t* sub_config = json_config_new(argv[1]);
-    if(sub_config == NULL) {
+    config_t* pub_config = json_config_new(argv[1]);
+    if(pub_config == NULL) {
         LOG_ERROR_0("Failed to load JSON configuration");
-        config_destroy(sub_config);
         return -1;
     }
 
-    LOG_INFO_0("Initializing publisher/subscriber");
+    set_log_level(LOG_LVL_INFO);
+
+    LOG_INFO_0("Initializing publisher");
 
     std::condition_variable err_cv;
 
-    MessageQueue* output_queue = new MessageQueue(-1);
-    Subscriber<ExampleMessage>* subscriber = NULL;
+    g_input_queue = new MessageQueue(-1);
+    g_publisher = new Publisher(
+            pub_config, err_cv, "publish_test", g_input_queue,
+            SERVICE_NAME);
+    g_publisher->start();
 
-    if(argc == 3) {
-        subscriber = new Subscriber<ExampleMessage>(
-                sub_config, err_cv, argv[2], output_queue, SERVICE_NAME);
-    } else {
-        subscriber = new Subscriber<ExampleMessage>(
-                sub_config, err_cv, TOPIC, output_queue, SERVICE_NAME);
+    // Give time to initialize publisher and subscriber
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
+    char* msg = new char[14];
+    memcpy(msg, "Hello, World!", 14);
+    msg[13] = '\0';
+
+    ExampleMessage* wrap = new ExampleMessage(msg);
+    while(true){
+        LOG_INFO_0("Enquing message to send");
+        g_input_queue->push(wrap);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
-
-    subscriber->start();
-
-    auto timeout = std::chrono::milliseconds(250);
-    while(!g_stop.load()) {
-        if(output_queue->wait_for(timeout)) {
-            LOG_INFO_0("Received message");
-            ExampleMessage* received = (ExampleMessage*) output_queue->front();
-            LOG_INFO("Received: %s", received->get_message());
-            output_queue->pop();
-            delete received;
-        }
-    }
-
-    delete subscriber;
-    delete output_queue;
-
+    delete g_publisher;
+    delete g_input_queue;
     return 0;
 }

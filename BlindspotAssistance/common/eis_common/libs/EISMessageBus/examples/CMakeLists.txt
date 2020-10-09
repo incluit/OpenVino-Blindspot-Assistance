@@ -87,3 +87,10 @@ target_link_libraries(thread-subscriber eismsgbus
                                         eisutils
                                         eismsgenv
                                         pthread)
+
+# Add publisher thread C++ example
+add_executable(pub_thread "pub_thread.cpp")
+target_link_libraries(pub_thread    eismsgbus
+                                    eisutils
+                                    eismsgenv
+                                    pthread)
