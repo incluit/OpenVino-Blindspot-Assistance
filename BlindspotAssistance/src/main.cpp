@@ -168,7 +168,7 @@ namespace
         vehicle->find_mode();
         time_t now = time(0);
         tm *ltm = localtime(&now);
-        char date[11], time[10];
+        char date[11], time[10], char_array[50]; 
         int payload_size, message_size;
         ExampleMessage* wrap;
 
@@ -178,8 +178,7 @@ namespace
         std::string payload = std::string(date)+","+std::string(time)+","+std::to_string(i)+","+std::to_string(f.label)+","+std::to_string(f.confidence)+
                                 ","+vehicle->get_mode_to_string();
 
-        char char_array[payload.length() + 1];
-        strcpy(char_array, payload.c_str());
+        memcpy(char_array, payload.c_str(), 50);
         wrap = new ExampleMessage(char_array);
         std::cout << "Enquing message to send: " << char_array << std::endl;
         g_input_queue->push(wrap);
