@@ -72,7 +72,9 @@ endif()
 
 add_subdirectory(src/common)
 target_link_libraries(${TARGET_NAME} ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} ngraph::ngraph common)
-target_link_libraries(${TARGET_NAME} paho-mqttpp3 paho-mqtt3as)
+#find cppzmq wrapper, installed by make of cppzmq
+find_package(cppzmq)
+target_link_libraries(${TARGET_NAME} cppzmq)
 
 if(UNIX)
     target_link_libraries( ${TARGET_NAME} pthread)

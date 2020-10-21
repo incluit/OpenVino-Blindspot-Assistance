@@ -40,8 +40,8 @@
 #include "threading.hpp"
 #include "graph.hpp"
 
-#include "mqtt.hpp"
-#include "mqtt/async_client.h"
+#include "alert_publisher.hpp"
+#include "vehicle_status.hpp"
 
 namespace
 {
@@ -79,7 +79,8 @@ namespace
         std::cout << "    -u                           " << utilization_monitors_message << std::endl;
         std::cout << "    -calibration                 " << calibration_message << std::endl;
         std::cout << "    -show_calibration            " << show_calibration_message << std::endl;
-        std::cout << "    -mqtt                        " << mqtt_message << std::endl;
+        std::cout << "    -alerts                      " << alerts_message << std::endl;
+        std::cout << "    -dm                          " << driver_mode << std::endl;
     }
 
     bool ParseAndCheckCommandLine(int argc, char *argv[])
@@ -134,6 +135,7 @@ namespace
     bool firstTime = true;
     cv::Rect2d roi[MAX_INPUTS];
     int camDetections[MAX_INPUTS];
+    AlertPublisher alertPublisher = AlertPublisher("BLAS");
 
     void drawDetections(cv::Mat &img, const std::vector<Detection> &detections)
     {
@@ -158,7 +160,20 @@ namespace
         }
     }
 
-    int areaDetectionCount(cv::Mat &img, const std::vector<Detection> &detections, cv::Rect2d roi)
+    void alertHandler(size_t i, const Detection &f, VehicleStatus *vehicle){
+
+        vehicle->find_mode();
+        std::string payload = std::to_string(i)+","+std::to_string(f.label)+","+std::to_string(f.confidence)+","+vehicle->get_mode_to_string();
+
+        // copying the contents of the string to char array
+        char char_array[payload.length() + 1];
+        strcpy(char_array, payload.c_str());
+
+        alertPublisher.sendAlert(char_array);
+
+    }
+
+    int areaDetectionCount(cv::Mat &img, const std::vector<Detection> &detections, size_t i, cv::Rect2d roi, VehicleStatus *vehicle)
     {
         int count = 0;
 
@@ -174,6 +189,11 @@ namespace
                 if (y > roi.y && y < roi.y + roi.height)
                 {
                     count += 1;
+
+                    // Send alert if enable
+                    if (FLAGS_alerts){
+                        alertHandler(i+1, f, vehicle);
+                    } 
                 }
             }
         }
@@ -189,16 +209,16 @@ namespace
         int points[MAX_INPUTS][4];
         if (!pointsFile.is_open()) // Check if file is really open
         {
-            std::cout << "Unable to upload init Area Configuration" << endl;
+            std::cout << "Unable to upload init Area Configuration" << std::endl;
         }
         else
         {
-            std::cout << "Reading Area Configuration" << endl;
+            std::cout << "Reading Area Configuration" << std::endl;
             while (getline(pointsFile, line))
             {
                 std::stringstream sst(line);
                 sst >> points[i][0] >> points[i][1] >> points[i][2] >> points[i][3];
-                std::cout << "Cam Area " << i + 1 << ": " << points[i][0] << ',' << points[i][1] << ',' << points[i][2] << ',' << points[i][3] << endl;
+                std::cout << "Cam Area " << i + 1 << ": " << points[i][0] << ',' << points[i][1] << ',' << points[i][2] << ',' << points[i][3] << std::endl;
                 i++;
             }
         }
@@ -257,10 +277,9 @@ namespace
     }
 
     void displayNSources(const std::vector<std::shared_ptr<VideoFrame>> &data,
-                         float time,
-                         const std::string &stats,
-                         DisplayParams params,
-                         Presenter &presenter)
+                         float time, const std::string &stats,
+                         DisplayParams params, Presenter &presenter,
+                         VehicleStatus *vehicle)
     {
         cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
         auto loopBody = [&](size_t i) {
@@ -274,7 +293,7 @@ namespace
                 {
                     drawDetections(windowPart, elem->detections.get<std::vector<Detection>>());
                 }
-                camDetections[i] = areaDetectionCount(windowPart, elem->detections.get<std::vector<Detection>>(), roi[i]);
+                camDetections[i] = areaDetectionCount(windowPart, elem->detections.get<std::vector<Detection>>(), i, roi[i], vehicle);
             }
         };
 
@@ -355,14 +374,14 @@ int main(int argc, char *argv[])
 {
     try
     {
+        VehicleStatus vehicle;
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
         slog::info << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
-        if (!ParseAndCheckCommandLine(argc, argv))
-        {
+        if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
 
@@ -370,8 +389,7 @@ int main(int argc, char *argv[])
 
         std::string modelPath = FLAGS_m;
         std::size_t found = modelPath.find_last_of(".");
-        if (found > modelPath.size())
-        {
+        if (found > modelPath.size()) {
             slog::info << "Invalid model name: " << modelPath << slog::endl;
             slog::info << "Expected to be <model_name>.xml" << slog::endl;
             return -1;
@@ -390,8 +408,7 @@ int main(int argc, char *argv[])
 
         std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
         auto inputDims = network->getInputDims();
-        if (4 != inputDims.size())
-        {
+        if (4 != inputDims.size()) {
             throw std::runtime_error("Invalid network input dimensions");
         }
 
@@ -405,16 +422,14 @@ int main(int argc, char *argv[])
         const auto duplicateFactor = (1 + FLAGS_duplicate_num);
         size_t numberOfInputs = (FLAGS_nc + files.size()) * duplicateFactor;
 
-        if (numberOfInputs == 0)
-        {
+        if (numberOfInputs == 0) {
             throw std::runtime_error("No valid inputs were supplied");
         }
 
         DisplayParams params = prepareDisplayParams(numberOfInputs);
 
         slog::info << "\tNumber of input channels:    " << numberOfInputs << slog::endl;
-        if (numberOfInputs > MAX_INPUTS)
-        {
+        if (numberOfInputs > MAX_INPUTS) {
             throw std::logic_error("Number of inputs exceed maximum value [25]");
         }
 
@@ -426,33 +441,25 @@ int main(int argc, char *argv[])
         vsParams.expectedWidth = static_cast<unsigned>(inputDims[3]);
 
         VideoSources sources(vsParams);
-        if (!files.empty())
-        {
+        if (!files.empty()) {
             slog::info << "Trying to open input video ..." << slog::endl;
-            for (auto &file : files)
-            {
-                try
-                {
+            for (auto &file : files){
+                try{
                     sources.openVideo(file, false, FLAGS_loop_video);
                 }
-                catch (...)
-                {
+                catch (...){
                     slog::info << "Cannot open video [" << file << "]" << slog::endl;
                     throw;
                 }
             }
         }
-        if (FLAGS_nc)
-        {
+        if (FLAGS_nc) {
             slog::info << "Trying to connect " << FLAGS_nc << " web cams ..." << slog::endl;
-            for (size_t i = 0; i < FLAGS_nc; ++i)
-            {
-                try
-                {
+            for (size_t i = 0; i < FLAGS_nc; ++i){
+                try{
                     sources.openVideo(std::to_string(i), true, false);
                 }
-                catch (...)
-                {
+                catch (...){
                     slog::info << "Cannot open web cam [" << i << "]" << slog::endl;
                     throw;
                 }
@@ -508,15 +515,13 @@ int main(int argc, char *argv[])
         std::stringstream statStream;
 
         std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show)
-        {
+        if (!FLAGS_no_show) {
             std::cout << " or switch to the output window and press ESC key";
         }
         std::cout << std::endl;
 
         cv::Size graphSize{static_cast<int>(params.windowSize.width / 4), 60};
         Presenter presenter(FLAGS_u, params.windowSize.height - graphSize.height - 10, graphSize);
-
         const size_t outputQueueSize = 1;
         AsyncOutput output(FLAGS_show_stats, outputQueueSize,
                            [&](const std::vector<std::shared_ptr<VideoFrame>> &result) {
@@ -526,7 +531,7 @@ int main(int argc, char *argv[])
                                    std::unique_lock<std::mutex> lock(statMutex);
                                    str = statStream.str();
                                }
-                               displayNSources(result, averageFps, str, params, presenter);
+                               displayNSources(result, averageFps, str, params, presenter, &vehicle);
                                int key = cv::waitKey(1);
                                presenter.handleKey(key);
 
@@ -534,43 +539,6 @@ int main(int argc, char *argv[])
                            });
 
         output.start();
-
-        ////////////    MQTT Client Init  ////////////////
-
-        string address = "tcp://localhost:1883";
-        string clientID = "async_publish";
-        mqtt::async_client client(address, clientID);
-
-        callback cb;
-        client.set_callback(cb);
-
-        mqtt::connect_options conopts;
-        mqtt::message willmsg(TOPIC, PAYLOAD, 1, true);
-        mqtt::will_options will(willmsg);
-        conopts.set_will(will);
-
-        mqtt::token_ptr conntok;
-
-        if (FLAGS_mqtt)
-        {
-            slog::info << "Initializing for server '" << address << "'..." << slog::endl;
-
-            slog::info << "\nConnecting..." << slog::endl;
-            conntok = client.connect(conopts);
-            slog::info << "Waiting for the connection..." << slog::endl;
-            try
-            {
-                conntok->wait();
-            }
-            catch (...)
-            {
-                slog::info << "MQTT broker: Error connection." << slog::endl;
-            }
-
-            slog::info << "  ...OK" << slog::endl;
-
-            /////////////////////////////
-        }
 
         using timer = std::chrono::high_resolution_clock;
         using duration = std::chrono::duration<float, std::milli>;
@@ -581,26 +549,20 @@ int main(int argc, char *argv[])
 
         size_t perfItersCounter = 0;
 
-        while (sources.isRunning() || network->isRunning())
-        {
+        while (sources.isRunning() || network->isRunning()) {
             bool readData = true;
-            while (readData)
-            {
+            while (readData) {
                 auto br = network->getBatchData(params.frameSize);
-                if (br.empty())
-                {
+                if (br.empty()){
                     break; // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
                 }
-                for (size_t i = 0; i < br.size(); i++)
-                {
+                for (size_t i = 0; i < br.size(); i++){
                     // this approach waits for the next input image for sourceIdx. If provided a single image,
                     // it may not show results, especially if -real_input_fps is enabled
                     auto val = static_cast<unsigned int>(br[i]->sourceIdx);
                     auto it = find_if(batchRes.begin(), batchRes.end(), [val](const std::shared_ptr<VideoFrame> &vf) { return vf->sourceIdx == val; });
-                    if (it != batchRes.end())
-                    {
-                        if (!FLAGS_no_show)
-                        {
+                    if (it != batchRes.end()){
+                        if (!FLAGS_no_show){
                             output.push(std::move(batchRes));
                         }
                         batchRes.clear();
@@ -611,45 +573,29 @@ int main(int argc, char *argv[])
             }
             ++fpsCounter;
 
-            if (FLAGS_mqtt)
-            {
-                // Test msg
-                slog::info << "\nSending message..." << slog::endl;
-                mqtt::message_ptr pubmsg = mqtt::make_message(TOPIC, "test");
-                pubmsg->set_qos(QOS);
-                client.publish(pubmsg)->wait_for(TIMEOUT);
-            }
-
-            if (!output.isAlive())
-            {
+            if (!output.isAlive()) {
                 break;
             }
 
             auto currTime = timer::now();
             auto deltaTime = (currTime - lastTime);
-            if (deltaTime >= samplingTimeout)
-            {
-                auto durMsec =
-                    std::chrono::duration_cast<duration>(deltaTime).count();
+            if (deltaTime >= samplingTimeout) {
+                auto durMsec = std::chrono::duration_cast<duration>(deltaTime).count();
                 auto frameTime = durMsec / static_cast<float>(fpsCounter);
                 fpsCounter = 0;
                 lastTime = currTime;
 
-                if (FLAGS_no_show)
-                {
+                if (FLAGS_no_show) {
                     slog::info << "Average Throughput : " << 1000.f / frameTime << " fps" << slog::endl;
-                    if (++perfItersCounter >= FLAGS_n_sp)
-                    {
+                    if (++perfItersCounter >= FLAGS_n_sp){
                         break;
                     }
                 }
-                else
-                {
+                else{
                     averageFps = frameTime;
                 }
 
-                if (FLAGS_show_stats)
-                {
+                if (FLAGS_show_stats) {
                     auto inputStat = sources.getStats();
                     auto inferStat = network->getStats();
                     auto outputStat = output.getStats();
@@ -658,10 +604,8 @@ int main(int argc, char *argv[])
                     statStream.str(std::string());
                     statStream << std::fixed << std::setprecision(1);
                     statStream << "Input reads: ";
-                    for (size_t i = 0; i < inputStat.readTimes.size(); ++i)
-                    {
-                        if (0 == (i % 4))
-                        {
+                    for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
+                        if (0 == (i % 4)) {
                             statStream << std::endl;
                         }
                         statStream << inputStat.readTimes[i] << "ms ";
@@ -679,30 +623,18 @@ int main(int argc, char *argv[])
 
                     statStream << "Render time: " << outputStat.renderTime
                                << "ms" << std::endl;
-                    if (FLAGS_show_calibration)
-                    {
-                        for (int i = 0; i < MAX_INPUTS; i++)
-                        {
-                            statStream << "Cam " << to_string(i + 1) << ": " << std::to_string(camDetections[i]) << std::endl;
+                    statStream << "Mode: " << vehicle.get_mode_to_string() << std::endl;
+                    if (FLAGS_show_calibration) {
+                        for (int i = 0; i < MAX_INPUTS; i++) {
+                            statStream << "Cam " << std::to_string(i + 1) << ": " << std::to_string(camDetections[i]) << std::endl;
                         }
                     }
 
-                    if (FLAGS_no_show)
-                    {
+                    if (FLAGS_no_show) {
                         slog::info << statStream.str() << slog::endl;
                     }
                 }
             }
-        }
-
-        if (FLAGS_mqtt)
-        {
-            //// Disconnect MQTT
-            slog::info << "\nDisconnecting..." << slog::endl;
-            conntok = client.disconnect();
-            conntok->wait();
-            slog::info << "  ...OK" << slog::endl;
-            ////
         }
 
         network.reset();

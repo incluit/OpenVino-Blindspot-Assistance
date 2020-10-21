@@ -80,70 +80,9 @@ By now you should have completed the Linux installation guide for the OpenVINOâ„
 
 == Building
 
-=== Basic Build
-
-**1.** Clone the repository at desired location:
-
-[source,bash]
-----
-git clone https://github.com/incluit/OpenVino-Blindspot-Assistance.git
-----
-
-**2.** The first step is to configure the build environment for the OpenCV toolkit by sourcing the "setupvars.sh" script:
-
-[source,bash]
-----
-source  /opt/intel/openvino/bin/setupvars.sh
-----
-
-**3.** Change to the BlindspotAssistance folder:
-
-[source,bash]
-----
-cd OpenVino-Blindspot-Assistance/BlindspotAssistance/
-----
-
-**4.** Download the necessary model
-
-[source,bash]
-----
-bash scripts/download_models.sh
-----
-
-**5.** Create a directory to build the tutorial in and change to it.
-
-[source,bash]
-----
-mkdir build
-cd build
-----
-
-**6.** Before running each of the following sections, be sure to source the helper script. That will make it easier to use environment variables instead of long names to the models:
-
-[source,bash]
-----
-source ../scripts/setupenv.sh
-----
-
-**7.** Compile
-
-[source,bash]
-----
-cmake -DCMAKE_BUILD_TYPE=Release ../
-make
-----
-
-**8.** Move to the executableâ€™s dir:
-
-[source,bash]
-----
-cd intel64/Release
-----
-
-
 === Build with Docker
 
-==== Prerequisites
+==== Install Docker
 
 * Docker. To install on Ubuntu, run:
 
@@ -156,7 +95,7 @@ sudo groupadd docker
 sudo usermod -aG docker $USER
 ----
 
-==== Installation
+==== Build in the docker
 
 **1.** Clone the repository at desired location:
 
@@ -172,38 +111,18 @@ git clone https://github.com/incluit/OpenVino-Blindspot-Assistance.git
 cd OpenVino-Blindspot-Assistance
 ----
 
-**3.** Build the docker:
+**3.** Build the docker and blindspot:
 [source,bash]
 ----
 make docker-build
-----
-
-=== Build in DockerHub
-The master brach of this repository is built in Docker Hub:
-
-https://hub.docker.com/r/openvinoincluit/blindspot-openvino
-
-You can pull the blindspot assistance Docker image using: 
-
-----
-docker pull openvinoincluit/blindspot-openvino
-----
-
-=== MQTT Broker Installation
-
-We are using Mosquitto MQTT broker to handle all the messages from blindspot assistance.
-
-To run Mosquitto broker in the base system use:
-
-----
-docker run -d --rm --name broker -p 1883:1883 eclipse-mosquitto
+make docker-run
 ----
 
 == Usage
 
 === Run
 
-Run the application with the `-h` option to see the usage message:
+From the outside the Blindspot Assistance Docker, verify all existing options for the example use cases by running the application with the `-h` option to see the usage message:
 
 [source,bash]
 ----
@@ -236,58 +155,63 @@ Options:
     -loop_video                  Optional. Enable playing video on a loop.
     -calibration                 Optional. Camera calibration.
     -show_calibration            Optional. Show camera calibration.
-    -mqtt                        Optional. MQTT broker to handle all the messages.
+    -alerts                      Optional. Send alerts to AlertManager through the proxy.
 ----
 
 ==== Examples
 
-**1.** Using 4 video files, using CPU and GPU:
+**1.** Driving Scenario: detection area configured by default, using CPU:
 
 [source,bash]
 ----
 ./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4
 ----
 
-**2.** Using MQTT Broker:
+**2.** Driving Scenario: detection area configured by default, using GPU:
 
 [source,bash]
 ----
-./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -mqtt
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4
 ----
 
-**3.** Using 3 video files and 1 camera (`-nc 1`):
-
-[source,bash]
-----
-./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 -nc 1
-----
-
-**4.** Using 4 video files, showing statistics report (`-show_stats`):
+**3.** Driving Scenario: detection area configured by default, using MYRIAD:
 
 [source,bash]
 ----
-./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -show_stats
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4
 ----
 
-**5.** Using 4 video files, without video output (`-no_show`). Average performance is displayed on the console.
 
-[source,bash]
-----
-./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -no_show
-----
-
-**6.** Using 4 video files, without detected objects (`-no_show_d`). 
+**3.** Driving Scenario: configuring detection area - visualization disabled:
 
 [source,bash]
 ----
-./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -no_show_d
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -calibration 
 ----
 
-**7.** Using 4 video files, changing the probability threshold for detections (`-t 0.1`). 
+**4.** Driving Scenario: configuring detection area - visualization enabled:
 
 [source,bash]
 ----
-./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -t 0.1
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -calibration -show_calibration
+----
+
+**5.** Running Blindspot Assistances along with Alert Manager Microservice:
+
+For enabling the Alert Manager Microservice check the following link: https://github.com/incluit/OpenVino-Alert-Manager
+
+[source,bash]
+----
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -calibration -show_calibration -alerts
+----
+
+**6.**  Running Blindspot Assistances along with Alert Manager Microservice and Cloud Connector Microservice: 
+
+For enabling the Cloud Connector Microservice check the following link: https://github.com/incluit/OpenVino-Cloud-Connector
+
+[source,bash]
+----
+./blindspot-assistance -m ../../../models/FP32/pedestrian-and-vehicle-detector-adas-0001.xml -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4 -calibration -show_calibration -alerts
 ----
 
 ==== Other models
@@ -307,28 +231,6 @@ You can also experiment by using different detection models, being the ones avai
 ./blindspot-assistance -m ../../../models/FP32/person-vehicle-bike-detection-crossroad-1016.xml -d HETERO:CPU,GPU -i ../../../data/BlindspotFront.mp4 ../../../data/BlindspotLeft.mp4 ../../../data/BlindspotRear.mp4 ../../../data/BlindspotRight.mp4
 ----
 
-==== Run in Docker
-**1.** Run the docker:
-
-[source,bash]
-----
-make docker-run
-----
-
-**2.** Run the example inside the Docker or try the detailed examples in Usage.
-[source,bash]
-----
-make run
-----
-
-**3** If you get out of the Docker, you can run it again:
-[source,bash]
-----
-docker start blindspotcont
-docker exec -it blindspotcont /bin/bash
----- 
-
-
 == Troubleshooting
 
 **1.** If you receive the following message inside the Docker:
@@ -344,6 +246,12 @@ xhost +
 ----
 Enter the Docker container and run it again.
 
+**2.** If you get out of the Docker, you can run it again:
+[source,bash]
+----
+docker start blindspotcont
+docker exec -it blindspotcont /bin/bash
+
 == [Optional] AWS (In Progress)
 
-We also plan to send the data through MQTT using AWS IoT-Core. Using AWS may incur in a cost, so this will also be optional for you to run with/without it.
+We also plan to send the data through ZMQ using AWS IoT-Core. Using AWS may incur in a cost, so this will also be optional for you to run with/without it.
