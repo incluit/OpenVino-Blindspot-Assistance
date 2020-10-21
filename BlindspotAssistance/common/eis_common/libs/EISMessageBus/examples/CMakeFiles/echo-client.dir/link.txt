@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/echo-client.dir/echo_client.o  -o echo-client -leismsgbus -leisutils -leismsgenv -lpthread 

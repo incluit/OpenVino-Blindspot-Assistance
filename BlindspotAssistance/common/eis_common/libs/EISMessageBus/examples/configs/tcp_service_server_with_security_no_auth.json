@@ -1,0 +1,8 @@
+{
+    "type": "zmq_tcp",
+    "echo_service": {
+        "host": "127.0.0.1",
+        "port": 8675,
+        "server_secret_key": "5xGOy6Op^}Y-o)R]r&V4kv!#$s#@EQu=fm=[2Y9Y"
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "type": "zmq_tcp",
+    "zmq_tcp_publish": {
+        "host": "127.0.0.1",
+        "port": 5569,
+        "server_secret_key": "H[J1%f:#?0Y1cpUL<nEkPKm.]:n@JI>j]*!u3N#9"
+    }
+}

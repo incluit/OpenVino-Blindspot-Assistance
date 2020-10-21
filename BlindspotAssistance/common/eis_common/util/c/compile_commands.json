@@ -1,0 +1,32 @@
+[
+{
+  "directory": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/build",
+  "command": "/usr/bin/cc -Deisutils_EXPORTS -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/cjson -I/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/wjreader.h  -fPIC   -o CMakeFiles/eisutils.dir/src/config.c.o   -c /opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/config.c",
+  "file": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/config.c"
+},
+{
+  "directory": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/build",
+  "command": "/usr/bin/cc -Deisutils_EXPORTS -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/cjson -I/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/wjreader.h  -fPIC   -o CMakeFiles/eisutils.dir/src/json_config.c.o   -c /opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/json_config.c",
+  "file": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/json_config.c"
+},
+{
+  "directory": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/build",
+  "command": "/usr/bin/cc -Deisutils_EXPORTS -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/cjson -I/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/wjreader.h  -fPIC   -o CMakeFiles/eisutils.dir/src/json_validator.c.o   -c /opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/json_validator.c",
+  "file": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/json_validator.c"
+},
+{
+  "directory": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/build",
+  "command": "/usr/bin/cc -Deisutils_EXPORTS -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/cjson -I/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/wjreader.h  -fPIC   -o CMakeFiles/eisutils.dir/src/logger.c.o   -c /opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/logger.c",
+  "file": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/logger.c"
+},
+{
+  "directory": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/build",
+  "command": "/usr/bin/c++  -Deisutils_EXPORTS -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/cjson -I/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/wjreader.h  -fPIC   -std=gnu++14 -o CMakeFiles/eisutils.dir/src/profiling.cpp.o -c /opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/profiling.cpp",
+  "file": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/profiling.cpp"
+},
+{
+  "directory": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/build",
+  "command": "/usr/bin/c++  -Deisutils_EXPORTS -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/cjson -I/include -I/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/wjreader.h  -fPIC   -std=gnu++14 -o CMakeFiles/eisutils.dir/src/thread_pool.cpp.o -c /opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/thread_pool.cpp",
+  "file": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/util/c/src/thread_pool.cpp"
+}
+]

@@ -1,0 +1,13 @@
+{
+    "type": "zmq_ipc",
+    "socket_dir": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/libs/EISMessageBus/examples/.socks",
+    "pub-0": {
+        "socket_file": "multi-topics"
+    },
+    "pub-1": {
+       "socket_file": "multi-topics"
+    },
+    "pub-": {
+       "socket_file": "multi-topics"
+    }
+}

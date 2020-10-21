@@ -91,3 +91,15 @@ endif()
 add_dependencies(ie_samples ${TARGET_NAME})
 
 target_link_libraries(${TARGET_NAME} monitors)
+
+target_link_libraries(${TARGET_NAME}    eismsgbus
+                                        eisutils
+                                        eismsgenv
+                                        pthread)
+
+# Copy over TCP configuration files
+file(GLOB CONFIGS "/app/BlindspotAssistance/common/eis_common/libs/EISMessageBus/examples/configs/*.json")
+
+foreach(CONFIG ${CONFIGS})
+    file(COPY "${CONFIG}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${ARCH}/${CMAKE_BUILD_TYPE}/configs")
+endforeach()

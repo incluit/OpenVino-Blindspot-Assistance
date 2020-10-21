@@ -1,0 +1,10 @@
+{
+    "type": "zmq_tcp",
+    "publish_test": {
+        "host": "127.0.0.1",
+        "port": 5569,
+        "server_public_key": "}>3bvvU22<Jp&7IL?jO5*Um[q[7d:-{zw.VhAJ@B",
+        "client_secret_key": "eJOAi6wJBkrOtJWl9!x+1iNydA14xEa7[Sj7xcnv",
+        "client_public_key": "4J4?(I13cwJgqi+T5nxg:Dyr5)l&reK]cxxTfa9V"
+    }
+}

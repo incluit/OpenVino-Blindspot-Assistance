@@ -1,0 +1,53 @@
+# Copyright (c) 2020 Intel Corporation.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+"""Python distutils installer for the Python EIS Config Manager library
+"""
+
+import os
+from distutils.core import setup
+
+# Python install script for config manager is added
+# for v2.3
+eis_configmanager_version = "2.3"
+eis_version = os.getenv("EIS_VERSION")
+if eis_version is not None and eis_version != "":
+    eis_configmanager_version = eis_version
+
+source_dir = "${CMAKE_CURRENT_SOURCE_DIR}"
+if not source_dir.startswith("/"):
+    source_dir = "."
+
+# Main package setup
+setup(
+    name='eis-configmanager',
+    version=eis_configmanager_version,
+    description='EIS config manager Python wrapper, Env Config',
+    keywords='config_manager eis config manager',
+    url='',
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Operating System :: POSIX',
+        'Intended Audience :: Developers',
+        'Topic :: System :: Networking',
+    ],
+    long_description='EIS Python Config Manager and Env Config',
+    package_dir={'': source_dir},
+    packages=['eis']
+)

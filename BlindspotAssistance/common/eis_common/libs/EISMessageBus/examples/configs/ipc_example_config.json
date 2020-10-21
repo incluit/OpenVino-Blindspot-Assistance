@@ -1,0 +1,4 @@
+{
+    "type": "zmq_ipc",
+    "socket_dir": "/opt/edge_insights_industrial/Edge_Insights_for_Industrial_2.3.1/IEdgeInsights/common/libs/EISMessageBus/examples/.socks"
+}

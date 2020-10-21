@@ -1,0 +1,7 @@
+{
+    "type": "zmq_tcp",
+    "zmq_tcp_publish": {
+        "host": "127.0.0.1",
+        "port": 5569
+    }
+}

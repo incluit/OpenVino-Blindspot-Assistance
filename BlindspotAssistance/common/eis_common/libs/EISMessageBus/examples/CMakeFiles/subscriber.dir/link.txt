@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/subscriber.dir/subscriber.o  -o subscriber -leismsgbus -leisutils -leismsgenv -lpthread 

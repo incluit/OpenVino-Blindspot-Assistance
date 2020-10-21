@@ -1,0 +1,133 @@
+# Copyright (c) 2020 Intel Corporation.
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# EIS Base Dockerfile for Go modules
+
+ARG UBUNTU_IMAGE_VERSION
+FROM ubuntu:$UBUNTU_IMAGE_VERSION
+LABEL description="EIS Base Image"
+
+ARG HOST_TIME_ZONE=""
+
+ENV GO_WORK_DIR /EIS/go/src/IEdgeInsights
+ENV GOPATH="/EIS/go"
+ENV PATH ${PATH}:/usr/local/go/bin:${GOPATH}/bin
+
+WORKDIR ${GO_WORK_DIR}
+
+#Installing Go and dep package manager tool for Go
+ARG GO_VERSION
+RUN apt-get update && \
+    apt-get install -y wget git build-essential pkg-config iputils-ping g++ && \
+    wget https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
+
+ARG DEBIAN_FRONTEND=noninteractive
+# Setting timezone inside the container
+RUN echo "$HOST_TIME_ZONE" >/etc/timezone && \
+    cat /etc/timezone && \
+    apt-get install -y tzdata && \ 
+    ln -sf /usr/share/zoneinfo/${HOST_TIME_ZONE} /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata
+
+ENV GLOG_GO_PATH ${GOPATH}/src/github.com/golang/glog
+ENV GLOG_VER 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+RUN mkdir -p ${GLOG_GO_PATH} && \
+    git clone https://github.com/golang/glog ${GLOG_GO_PATH} && \
+    cd ${GLOG_GO_PATH} && \
+    git checkout -b ${GLOG_VER} ${GLOG_VER}
+
+# This is a dependency for gojsonschema and is not used directly by source code
+ENV GO_JSON_REFERENCE ${GOPATH}/src/github.com/xeipuuv/gojsonreference
+RUN mkdir -p ${GO_JSON_REFERENCE} && \
+    git clone https://github.com/xeipuuv/gojsonreference ${GO_JSON_REFERENCE} && \
+    cd ${GO_JSON_REFERENCE} && \
+    git checkout -b known_version bd5ef7bd5415a7ac448318e64f11a24cd21e594b
+
+# This is a dependency for gojsonschema and is not used directly by source code
+ENV GO_JSON_POINTER ${GOPATH}/src/github.com/xeipuuv/gojsonpointer
+RUN mkdir -p ${GO_JSON_POINTER} && \
+    git clone https://github.com/xeipuuv/gojsonpointer ${GO_JSON_POINTER} && \
+    cd ${GO_JSON_POINTER} && \
+    git checkout -b known_version 4e3ac2762d5f479393488629ee9370b50873b3a6
+
+# Installing Go JSON schema validator
+ENV GO_JSON_SCHEMA ${GOPATH}/src/github.com/xeipuuv/gojsonschema
+RUN mkdir -p ${GO_JSON_SCHEMA} && \
+    git clone https://github.com/xeipuuv/gojsonschema ${GO_JSON_SCHEMA} && \
+    cd ${GO_JSON_SCHEMA} && \
+    git checkout -b known_version 82fcdeb203eb6ab2a67d0a623d9c19e5e5a64927
+
+RUN wget -qO- https://cmake.org/files/v3.15/cmake-3.15.0-Linux-x86_64.tar.gz | \
+    tar --strip-components=1 -xz -C /usr/local
+
+# These flags are needed for enabling security while compiling and linking with cpuidcheck in golang
+ENV CGO_CFLAGS "$CGO_FLAGS -O2 -D_FORTIFY_SOURCE=2 -Werror=format-security -fstack-protector-strong -fPIC"
+ENV CGO_LDFLAGS "$CGO_LDFLAGS -z noexecstack -z relro -z now"
+
+ENV ETCD_GO_PATH ${GOPATH}/src/go.etcd.io/etcd
+ENV ETCD_GO_VER 0c787e26bcd102c3bb14050ac893b07ba9ea029f
+RUN mkdir -p ${ETCD_GO_PATH} && \
+    git clone https://github.com/etcd-io/etcd ${ETCD_GO_PATH} && \
+    cd ${ETCD_GO_PATH} && \
+    git checkout -b ${ETCD_GO_VER} ${ETCD_GO_VER}
+
+ENV PY_WORK_DIR /EIS
+WORKDIR ${PY_WORK_DIR}
+
+# Installing python 2, pip2, python 3.6 and pip3.6
+RUN apt-get update && \
+    apt-get install -y software-properties-common pkg-config python python-pip && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y python3.6 python3.6-dev python3-distutils && \
+    apt-get install python3-pip -y && \
+    apt-get install -y libsm6 libxext6 libfontconfig1 libxrender1
+
+RUN ln -sf /usr/bin/pip3 /usr/bin/pip3.6
+
+# Installing python JSON schema validator
+RUN pip3 install jsonschema==3.2.0
+
+ENV PY_ETCD3_VERSION cdc4c48bde88a795230a02aa574df84ed9ccfa52
+RUN git clone https://github.com/kragniz/python-etcd3 && \
+    cd python-etcd3 && \
+    git checkout -b ${PY_ETCD3_VERSION} ${PY_ETCD3_VERSION} && \
+    python3.6 setup.py install && \
+    cd .. && \
+    rm -rf python-etcd3
+
+COPY libs/EISMessageBus/install.sh ./install.sh
+
+RUN ./install.sh --cython
+
+ENV LD_LIBRARY_PATH "/usr/local/lib"
+
+RUN rm -rf /usr/local/bin/ccmake && \
+    rm -rf /usr/local/bin/cmake-gui && \
+    rm -rf /usr/local/bin/cpack && \
+    rm -rf /usr/local/bin/ctest &&  \
+    rm -rf /usr/local/doc && \
+    rm -rf /usr/local/man && \
+    rm -rf /usr/local/share/aclocal && \
+    rm -rf /usr/local/share/applications && \
+    rm -rf /usr/local/share/icons && \
+    rm -rf /usr/local/share/mime
+HEALTHCHECK NONE

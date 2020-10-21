@@ -81,6 +81,7 @@ namespace
         std::cout << "    -show_calibration            " << show_calibration_message << std::endl;
         std::cout << "    -alerts                      " << alerts_message << std::endl;
         std::cout << "    -dm                          " << driver_mode << std::endl;
+        std::cout << "    -msg_bus                     " << eis_msg_bus << std::endl;
     }
 
     bool ParseAndCheckCommandLine(int argc, char *argv[])
@@ -129,13 +130,15 @@ namespace
         Detection(cv::Rect2f r, int l, float c) : rect(r), label(l), confidence(c) {}
     };
 
+    // Globals
     const size_t DISP_WIDTH = 1280;
     const size_t DISP_HEIGHT = 720;
     const size_t MAX_INPUTS = 4;
     bool firstTime = true;
     cv::Rect2d roi[MAX_INPUTS];
     int camDetections[MAX_INPUTS];
-    AlertPublisher alertPublisher = AlertPublisher("BLAS");
+    Publisher* g_publisher = NULL;
+    MessageQueue* g_input_queue = NULL;
 
     void drawDetections(cv::Mat &img, const std::vector<Detection> &detections)
     {
@@ -163,14 +166,22 @@ namespace
     void alertHandler(size_t i, const Detection &f, VehicleStatus *vehicle){
 
         vehicle->find_mode();
-        std::string payload = std::to_string(i)+","+std::to_string(f.label)+","+std::to_string(f.confidence)+","+vehicle->get_mode_to_string();
+        time_t now = time(0);
+        tm *ltm = localtime(&now);
+        char date[11], time[10], char_array[50]; 
+        int payload_size, message_size;
+        ExampleMessage* wrap;
 
-        // copying the contents of the string to char array
-        char char_array[payload.length() + 1];
-        strcpy(char_array, payload.c_str());
+        snprintf ((char *) date, 11, "%.2d/%.2d/%.4d", ltm->tm_mday, 1 + ltm->tm_mon, 1900 + ltm->tm_year);
+        snprintf ((char *) time, 10, "%.2d:%.2d:%.2d", ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
 
-        alertPublisher.sendAlert(char_array);
+        std::string payload = std::string(date)+","+std::string(time)+","+std::to_string(i)+","+std::to_string(f.label)+","+std::to_string(f.confidence)+
+                                ","+vehicle->get_mode_to_string();
 
+        memcpy(char_array, payload.c_str(), 50);
+        wrap = new ExampleMessage(char_array);
+        std::cout << "Enquing message to send: " << char_array << std::endl;
+        g_input_queue->push(wrap);
     }
 
     int areaDetectionCount(cv::Mat &img, const std::vector<Detection> &detections, size_t i, cv::Rect2d roi, VehicleStatus *vehicle)
@@ -191,7 +202,7 @@ namespace
                     count += 1;
 
                     // Send alert if enable
-                    if (FLAGS_alerts){
+                    if (strlen(FLAGS_msg_bus.c_str()) > 0 && FLAGS_alerts){
                         alertHandler(i+1, f, vehicle);
                     } 
                 }
@@ -375,6 +386,7 @@ int main(int argc, char *argv[])
     try
     {
         VehicleStatus vehicle;
+    
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
@@ -383,6 +395,30 @@ int main(int argc, char *argv[])
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
+        }
+
+        // Setting EIS Message Bus publisher ----------------------
+        const char* msg_bus_config = FLAGS_msg_bus.c_str();
+
+        if(strlen(msg_bus_config) > 0 && FLAGS_alerts){
+            //Loading JSON config file
+            config_t* pub_config = json_config_new(msg_bus_config);
+            if(pub_config == NULL) {
+                LOG_ERROR_0("Failed to load JSON configuration");
+                return -1;
+            }
+
+            std::condition_variable err_cv;
+
+            g_input_queue = new MessageQueue(-1);
+            g_publisher = new Publisher(
+                    pub_config, err_cv, TOPIC, g_input_queue,
+                    SERVICE_NAME);
+            g_publisher->start();
+
+            // Give time to initialize publisher
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
         }
 
         readArea();
@@ -640,6 +676,12 @@ int main(int argc, char *argv[])
         network.reset();
 
         std::cout << presenter.reportMeans() << '\n';
+
+        // EIS Message Bus publisher
+        if(strlen(msg_bus_config) > 0 && FLAGS_alerts){
+            delete g_publisher;
+            delete g_input_queue;
+        }
     }
     catch (const std::exception &error)
     {

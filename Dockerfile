@@ -12,13 +12,16 @@ RUN apt-get install -y --no-install-recommends \
         git \
         gcc \
         make \
-        cmake \
-        cmake-gui\
-        cmake-curses-gui \
+        wget \
+        vim \
         libssl-dev \
         sudo \
         gnutls-dev pkg-config
 
+RUN wget https://cmake.org/files/v3.15/cmake-3.15.0-Linux-x86_64.sh
+RUN mkdir /opt/cmake
+RUN bash cmake-3.15.0-Linux-x86_64.sh --prefix=/opt/cmake --skip-license
+RUN update-alternatives --install /usr/bin/cmake cmake /opt/cmake/bin/cmake 1 --force
 #ZMQ
 # Install ZQM lib
 WORKDIR /root
@@ -33,8 +36,13 @@ WORKDIR /root/cppzmq/build
 RUN cmake ..
 RUN make -j4 install
 
-# Blindspot
+# EIS message bus
 ADD . /app
+WORKDIR /app/BlindspotAssistance/common/eis_common
+RUN bash /app/BlindspotAssistance/common/eis_common/eis_libs_installer.sh
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
+
+# Blindspot
 WORKDIR /app/BlindspotAssistance
 RUN mkdir -p build
 WORKDIR /app/BlindspotAssistance/build
