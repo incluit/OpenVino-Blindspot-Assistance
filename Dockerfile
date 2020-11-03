@@ -13,7 +13,6 @@ RUN apt-get install -y --no-install-recommends \
         gcc \
         make \
         wget \
-        vim \
         libssl-dev \
         sudo \
         gnutls-dev pkg-config
@@ -24,17 +23,17 @@ RUN bash cmake-3.15.0-Linux-x86_64.sh --prefix=/opt/cmake --skip-license
 RUN update-alternatives --install /usr/bin/cmake cmake /opt/cmake/bin/cmake 1 --force
 #ZMQ
 # Install ZQM lib
-WORKDIR /root
-RUN git clone https://github.com/zeromq/libzmq
-WORKDIR /root/libzmq/build
-RUN cmake ..
-RUN make -j4 install
+#WORKDIR /root
+#RUN git clone https://github.com/zeromq/libzmq
+#WORKDIR /root/libzmq/build
+#RUN cmake ..
+#RUN make -j4 install
 # Install cppzmq
-WORKDIR /root
-RUN git clone https://github.com/zeromq/cppzmq
-WORKDIR /root/cppzmq/build
-RUN cmake ..
-RUN make -j4 install
+#WORKDIR /root
+#RUN git clone https://github.com/zeromq/cppzmq
+#WORKDIR /root/cppzmq/build
+#RUN cmake ..
+#RUN make -j4 install
 
 # EIS message bus
 ADD . /app
